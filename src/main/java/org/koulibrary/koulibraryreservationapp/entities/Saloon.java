@@ -15,6 +15,9 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_saloon_library_id", columnList = "library_id")
+})
 public class Saloon {
 
     @Id
@@ -32,9 +35,16 @@ public class Saloon {
 
     private Integer capacity;
 
-    private LocalTime openingTime;
 
-    private LocalTime closingTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "library_id", nullable = false)
+    private Library library;
+
+    //those fields, which is the below, will fetch from the library entity
+
+    //private LocalTime openingTime;
+
+    //private LocalTime closingTime;
 
     @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL)
     private Set<Desk> tables;
