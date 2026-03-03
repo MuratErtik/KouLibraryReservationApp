@@ -1,3 +1,35 @@
 spring:
   application:
     name: KouLibraryReservationApp
+
+  #datasouce conf start
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  #datasouce conf end
+
+  #jpa conf start
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      org.hibernate:
+        envers:
+          global_with_modified_flag: true
+      hibernate:
+
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 5
+        order_updates: true
+        order_inserts: true
+
+    defer-datasource-initialization: false
+
+  #jpa conf end
