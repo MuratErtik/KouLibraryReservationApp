@@ -24,6 +24,9 @@ public class QrCode {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Version
+    private Long version;
+
     // value into physical QR
     @Column(nullable = false, unique = true, updatable = false)
     private String code;
