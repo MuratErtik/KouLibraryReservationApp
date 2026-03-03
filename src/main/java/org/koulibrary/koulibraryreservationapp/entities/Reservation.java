@@ -46,6 +46,8 @@ public class Reservation {
 
     private LocalDateTime lastCheckpointTime;
 
+    private LocalDateTime reservationTime;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
