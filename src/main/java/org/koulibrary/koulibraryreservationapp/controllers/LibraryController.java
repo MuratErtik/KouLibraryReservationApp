@@ -4,10 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.*;
 
@@ -35,6 +41,16 @@ public class LibraryController {
     //Update
 
     //Listing
+
+    // list just one library by some filters
+
+    //listing all
+    @GetMapping("get-all")
+    public ResponseEntity<PageResponse<LibraryResponse>> getAllLibraries(
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getAllLibraries(pageable));
+    }
 
     //Change Rules
 }
