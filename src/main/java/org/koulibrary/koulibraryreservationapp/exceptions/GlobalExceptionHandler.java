@@ -53,5 +53,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(LibrariesTableIsEmptyException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public ErrorDetail handleLibrariesTableIsEmptyException(LibrariesTableIsEmptyException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NO_CONTENT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
 
 }
