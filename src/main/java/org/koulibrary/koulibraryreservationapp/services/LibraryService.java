@@ -4,17 +4,29 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 
+import org.koulibrary.koulibraryreservationapp.exceptions.LibrariesTableIsEmptyException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
+import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class LibraryService {
 
     private final LibraryManager libraryManager;
+
+    private final LibraryRepository libraryRepository;
 
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
@@ -44,4 +56,39 @@ public class LibraryService {
     }
 
 
+    public PageResponse<LibraryResponse> getAllLibraries(Pageable pageable) {
+
+        Page<Library> libraries = libraryManager.getAllLibraries(pageable);
+
+        List<LibraryResponse> responses = libraries.getContent().stream()
+                .map(this::mapToResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryResponse>builder()
+                .content(responses)
+                .pageNumber(libraries.getNumber())
+                .pageSize(libraries.getSize())
+                .totalElements(libraries.getTotalElements())
+                .totalPages(libraries.getTotalPages())
+                .isLast(libraries.isLast())
+                .build();
+
+    }
+
+    private LibraryResponse mapToResponse(Library library) {
+        return LibraryResponse.builder()
+                .id(library.getId())
+                .name(library.getName())
+                .description(library.getDescription())
+                .address(library.getAddress())
+                .checkpointGraceMinutes(library.getCheckpointGraceMinutes())
+                .maxActiveReservationsPerUser(library.getMaxActiveReservationsPerUser())
+                .reservationWindowInDays(library.getReservationWindowInDays())
+                .checkInTimeoutMinutes(library.getCheckInTimeoutMinutes())
+                .checkpointIntervalMinutes(library.getCheckpointIntervalMinutes())
+                .penaltyBlockDays(library.getPenaltyBlockDays())
+                .build();
+
+    }
 }
