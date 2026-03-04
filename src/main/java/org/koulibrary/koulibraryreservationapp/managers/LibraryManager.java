@@ -1,10 +1,13 @@
 package org.koulibrary.koulibraryreservationapp.managers;
 
 import lombok.RequiredArgsConstructor;
+
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +25,12 @@ public class LibraryManager {
         }
         return libraryRepository.save(library);
 
-//        try{
-//            return libraryRepository.save(library);
-//        }
-//        catch (DataIntegrityViolationException e){
-//            throw new LibraryAlreadyExistsException(library.getName());
-//        }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Library> getAllLibraries(Pageable pageable) {
+
+        return libraryRepository.findAll(pageable);
+
     }
 }
