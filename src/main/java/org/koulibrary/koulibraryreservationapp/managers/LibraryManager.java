@@ -43,5 +43,22 @@ public class LibraryManager {
 
     }
 
+    @Transactional(readOnly = true)
+    public Page<Library> getLibraryByName(String name,Pageable pageable) {
+
+        Page<Library> libraries = libraryRepository.findByNameContainingIgnoreCase(name,pageable);
+
+        if (libraries.isEmpty()) {
+            throw new LibraryNotFoundException("Library not found with name " + name);
+        }
+
+        return libraries;
+    }
+
+
+
+
+
+
 
 }
