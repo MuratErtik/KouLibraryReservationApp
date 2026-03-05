@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
+import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -33,4 +34,14 @@ public class LibraryManager {
         return libraryRepository.findAll(pageable);
 
     }
+
+    @Transactional(readOnly = true)
+    public Library getLibraryById(Long libraryId) {
+
+        return libraryRepository.findById(libraryId)
+                .orElseThrow(() -> new LibraryNotFoundException("Library not found with id " + libraryId));
+
+    }
+
+
 }
