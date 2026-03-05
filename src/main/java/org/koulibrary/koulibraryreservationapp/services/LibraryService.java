@@ -30,7 +30,7 @@ public class LibraryService {
 
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
-        Library library = mapToEntity(request);
+        Library library = libraryMapper.toEntity(request);
 
         Library savedLibrary = libraryManager.saveLibrary(library);
 
@@ -41,27 +41,13 @@ public class LibraryService {
                 .build();
     }
 
-    private Library mapToEntity(CreateLibraryRequest request) {
-        return Library.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .address(request.getAddress())
-                .checkpointGraceMinutes(request.getCheckpointGraceMinutes())
-                .maxActiveReservationsPerUser(request.getMaxActiveReservationsPerUser())
-                .reservationWindowInDays(request.getReservationWindowInDays())
-                .checkInTimeoutMinutes(request.getCheckInTimeoutMinutes())
-                .checkpointIntervalMinutes(request.getCheckpointIntervalMinutes())
-                .penaltyBlockDays(request.getPenaltyBlockDays())
-                .build();
-    }
-
 
     public PageResponse<LibraryResponse> getAllLibraries(Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getAllLibraries(pageable);
 
         List<LibraryResponse> responses = libraries.getContent().stream()
-                .map(this::mapToResponse)
+                .map(libraryMapper::toResponse)
                 .toList();
 
 
@@ -76,27 +62,12 @@ public class LibraryService {
 
     }
 
-    private LibraryResponse mapToResponse(Library library) {
-        return LibraryResponse.builder()
-                .id(library.getId())
-                .name(library.getName())
-                .description(library.getDescription())
-                .address(library.getAddress())
-                .checkpointGraceMinutes(library.getCheckpointGraceMinutes())
-                .maxActiveReservationsPerUser(library.getMaxActiveReservationsPerUser())
-                .reservationWindowInDays(library.getReservationWindowInDays())
-                .checkInTimeoutMinutes(library.getCheckInTimeoutMinutes())
-                .checkpointIntervalMinutes(library.getCheckpointIntervalMinutes())
-                .penaltyBlockDays(library.getPenaltyBlockDays())
-                .build();
-
-    }
 
     public LibraryResponse getLibraryById(Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
-        return mapToResponse(library);
+        return libraryMapper.toResponse(library);
     }
 
     public PageResponse<LibraryResponse> getLibraryByName(String name, Pageable pageable) {
@@ -104,7 +75,7 @@ public class LibraryService {
         Page<Library> libraries = libraryManager.getLibraryByName(name, pageable);
 
         return PageResponse.<LibraryResponse>builder()
-                .content(libraries.map(this::mapToResponse).getContent())
+                .content(libraries.map((libraryMapper::toResponse)).getContent())
                 .pageNumber(libraries.getNumber())
                 .pageSize(libraries.getSize())
                 .totalElements(libraries.getTotalElements())
