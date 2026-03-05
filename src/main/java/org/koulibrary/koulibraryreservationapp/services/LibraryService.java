@@ -8,7 +8,8 @@ import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 
-import org.koulibrary.koulibraryreservationapp.exceptions.LibrariesTableIsEmptyException;
+
+import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
@@ -17,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Service
@@ -90,5 +91,12 @@ public class LibraryService {
                 .penaltyBlockDays(library.getPenaltyBlockDays())
                 .build();
 
+    }
+
+    public LibraryResponse getLibraryById(Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        return mapToResponse(library);
     }
 }
