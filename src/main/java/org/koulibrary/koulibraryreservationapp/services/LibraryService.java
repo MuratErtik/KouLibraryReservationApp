@@ -41,7 +41,6 @@ public class LibraryService {
                 .build();
     }
 
-
     public PageResponse<LibraryResponse> getAllLibraries(Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getAllLibraries(pageable);
@@ -61,7 +60,6 @@ public class LibraryService {
                 .build();
 
     }
-
 
     public LibraryResponse getLibraryById(Long libraryId) {
 
