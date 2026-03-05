@@ -3,6 +3,7 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
@@ -41,10 +42,21 @@ public class LibraryController {
 
     //Update
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<LibraryResponse> updateLibrary(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateLibraryRequest request) {
+
+        LibraryResponse response= libraryService.updateLibrary(id, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
     //Listing
 
     // list just one library by some filter
-    //name,id
     @GetMapping
     public ResponseEntity<PageResponse<LibraryResponse>> getLibraryByName(@RequestParam String name,
                                                                   @PageableDefault(size = 10, sort = "name") Pageable pageable) {
@@ -66,5 +78,14 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getAllLibraries(pageable));
     }
 
-    //Change Rules
+    @DeleteMapping("/{libraryId}")
+    public ResponseEntity<Void> deleteLibrary(@PathVariable Long libraryId) {
+
+
+        libraryService.deleteLibrary(libraryId);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
 }
