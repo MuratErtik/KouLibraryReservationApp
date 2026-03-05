@@ -7,6 +7,7 @@ import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryRespo
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -44,11 +45,12 @@ public class LibraryController {
 
     // list just one library by some filter
     //name,id
-//    @GetMapping
-//    public ResponseEntity<LibraryResponse> getLibraryByName(@RequestParam String name) {
-//
-//        return ResponseEntity.ok(libraryService.getLibraryByName(name));
-//    }
+    @GetMapping
+    public ResponseEntity<PageResponse<LibraryResponse>> getLibraryByName(@RequestParam String name,
+                                                                  @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getLibraryByName(name,pageable));
+    }
 
     @GetMapping("/{libraryId}")
     public ResponseEntity<LibraryResponse> getLibraryById(@PathVariable Long libraryId) {
