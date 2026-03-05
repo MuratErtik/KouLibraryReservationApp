@@ -55,7 +55,11 @@ public class LibraryManager {
         return libraries;
     }
 
+    @Transactional
+    public void deleteLibraryById(Long libraryId) {
 
+        libraryRepository.deleteById(libraryId);
+    }
 
 
 
