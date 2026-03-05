@@ -64,5 +64,19 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(LibraryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleLibraryNotFoundException(LibraryNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
 
 }
