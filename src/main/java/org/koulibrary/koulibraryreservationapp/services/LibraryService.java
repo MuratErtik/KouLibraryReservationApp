@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,5 +100,19 @@ public class LibraryService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         return mapToResponse(library);
+    }
+
+    public PageResponse<LibraryResponse> getLibraryByName(String name, Pageable pageable) {
+
+        Page<Library> libraries = libraryManager.getLibraryByName(name, pageable);
+
+        return PageResponse.<LibraryResponse>builder()
+                .content(libraries.map(this::mapToResponse).getContent())
+                .pageNumber(libraries.getNumber())
+                .pageSize(libraries.getSize())
+                .totalElements(libraries.getTotalElements())
+                .totalPages(libraries.getTotalPages())
+                .isLast(libraries.isLast())
+                .build();
     }
 }
