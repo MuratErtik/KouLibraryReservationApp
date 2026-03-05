@@ -2,26 +2,23 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 
 
-import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
-import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
+import org.koulibrary.koulibraryreservationapp.mappers.LibraryMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +26,7 @@ public class LibraryService {
 
     private final LibraryManager libraryManager;
 
-    private final LibraryRepository libraryRepository;
+    private final LibraryMapper libraryMapper;
 
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
@@ -115,4 +112,22 @@ public class LibraryService {
                 .isLast(libraries.isLast())
                 .build();
     }
+
+    public LibraryResponse updateLibrary(Long id, @Valid UpdateLibraryRequest request) {
+
+        Library library = libraryManager.getLibraryById(id);
+
+        libraryMapper.updateLibraryFromDto(request,library);
+
+        return libraryMapper.toResponse(library);
+    }
+
+    public void deleteLibrary(Long id) {
+
+        Library library = libraryManager.getLibraryById(id);
+
+        libraryManager.deleteLibraryById(library.getId());
+    }
+
+
 }
