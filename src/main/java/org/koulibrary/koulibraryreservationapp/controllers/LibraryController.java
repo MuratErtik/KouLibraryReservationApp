@@ -42,9 +42,21 @@ public class LibraryController {
 
     //Listing
 
-    // list just one library by some filters
+    // list just one library by some filter
+    //name,id
+//    @GetMapping
+//    public ResponseEntity<LibraryResponse> getLibraryByName(@RequestParam String name) {
+//
+//        return ResponseEntity.ok(libraryService.getLibraryByName(name));
+//    }
 
-    //listing all
+    @GetMapping("/{libraryId}")
+    public ResponseEntity<LibraryResponse> getLibraryById(@PathVariable Long libraryId) {
+
+        return ResponseEntity.ok(libraryService.getLibraryById(libraryId));
+    }
+
+    
     @GetMapping("get-all")
     public ResponseEntity<PageResponse<LibraryResponse>> getAllLibraries(
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {
