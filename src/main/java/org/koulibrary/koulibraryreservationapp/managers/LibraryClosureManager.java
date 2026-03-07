@@ -5,6 +5,7 @@ import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.exceptions.IntervalDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
+import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryClosuresRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,5 +33,18 @@ public class LibraryClosureManager {
 
         return libraryClosuresRepository.save(libraryClosures);
 
+    }
+
+    @Transactional(readOnly = true)
+    public LibraryClosures getLibraryClosureById(Long libraryClosureId) {
+
+        return libraryClosuresRepository.findById(libraryClosureId)
+                .orElseThrow(() -> new LibraryNotFoundException("Library closure not found with id " + libraryClosureId));
+
+    }
+
+    @Transactional
+    public void updateLibraryClosure(LibraryClosures libraryClosuresToUpdate) {
+        libraryClosuresRepository.save(libraryClosuresToUpdate);
     }
 }
