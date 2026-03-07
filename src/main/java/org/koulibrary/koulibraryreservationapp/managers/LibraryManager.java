@@ -28,6 +28,11 @@ public class LibraryManager {
 
     }
 
+    @Transactional
+    public void updateLibrary(Library library) {
+         libraryRepository.save(library);
+    }
+
     @Transactional(readOnly = true)
     public Page<Library> getAllLibraries(Pageable pageable) {
 
