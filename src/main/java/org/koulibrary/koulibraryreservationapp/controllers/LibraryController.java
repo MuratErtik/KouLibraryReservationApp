@@ -129,6 +129,15 @@ public class LibraryController {
 
 
 
+    @DeleteMapping("/{libraryId}/delete-closure/{closureId}")
+    public ResponseEntity<Void> deleteLibraryClosure(@PathVariable Long libraryId, @PathVariable Long closureId) {
+
+
+        libraryService.deleteLibraryClosure(libraryId,closureId);
+        return ResponseEntity.noContent().build();
+
+
+    }
 
 
 
