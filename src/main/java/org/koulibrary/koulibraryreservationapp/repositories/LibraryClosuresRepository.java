@@ -2,6 +2,8 @@ package org.koulibrary.koulibraryreservationapp.repositories;
 
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -16,5 +18,7 @@ public interface LibraryClosuresRepository extends JpaRepository<LibraryClosures
     );
 
     Optional<LibraryClosures> findById(Long id);
+
+    Page<LibraryClosures> findByLibrary(Library library, Pageable pageable);
 
 }
