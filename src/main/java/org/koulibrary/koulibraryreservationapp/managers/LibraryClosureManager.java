@@ -7,6 +7,8 @@ import org.koulibrary.koulibraryreservationapp.exceptions.IntervalDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryClosuresRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.time.DateTimeException;
 public class LibraryClosureManager {
 
     private final LibraryClosuresRepository libraryClosuresRepository;
+
+    private final LibraryManager libraryManager;
 
 
     @Transactional
@@ -46,5 +50,12 @@ public class LibraryClosureManager {
     @Transactional
     public void updateLibraryClosure(LibraryClosures libraryClosuresToUpdate) {
         libraryClosuresRepository.save(libraryClosuresToUpdate);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LibraryClosures> getAllLibraryClosures(Pageable pageable,Library library) {
+
+
+        return libraryClosuresRepository.findByLibrary(library,pageable);
     }
 }
