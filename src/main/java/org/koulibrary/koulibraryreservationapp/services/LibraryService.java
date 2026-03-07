@@ -136,13 +136,17 @@ public class LibraryService {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
-        if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
-            throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
+        if (request.getEndDateTime()!=null && request.getStartDateTime()!=null){
+            if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
+                throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
+            }
         }
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
 
-        libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
+        LibraryClosures libraryClosuresToUpdate = libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
+
+        libraryClosureManager.updateLibraryClosure(libraryClosuresToUpdate);
 
         return libraryClosuresMapper.toResponse(libraryClosures);
 
