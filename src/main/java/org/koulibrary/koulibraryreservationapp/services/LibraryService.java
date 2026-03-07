@@ -13,6 +13,7 @@ import org.koulibrary.koulibraryreservationapp.entities.Library;
 
 
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
+import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
@@ -109,6 +110,7 @@ public class LibraryService {
         libraryManager.deleteLibraryById(library.getId());
     }
 
+    //Closure Methods....
 
     public CreateLibraryClosureResponse createLibraryClosure(@Valid CreateLibraryClosureRequest request, Long libraryId) {
 
@@ -116,7 +118,7 @@ public class LibraryService {
 
 
         if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
-            throw new DateTimeException("Start date cannot be after end date");
+            throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
         }
 
         LibraryClosures libraryClosures = libraryClosuresMapper.toEntity(request,library);
