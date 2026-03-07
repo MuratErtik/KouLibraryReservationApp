@@ -58,4 +58,10 @@ public class LibraryClosureManager {
 
         return libraryClosuresRepository.findByLibrary(library,pageable);
     }
+
+    @Transactional
+    public void deleteLibraryClosureId(Long closureId) {
+
+        libraryClosuresRepository.deleteById(closureId);
+    }
 }
