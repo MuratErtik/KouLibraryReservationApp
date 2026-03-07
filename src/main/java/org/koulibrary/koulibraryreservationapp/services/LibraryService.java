@@ -4,11 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryClosureRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryClosureResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 
 
@@ -24,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
-import java.time.DateTimeException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -98,7 +94,10 @@ public class LibraryService {
 
         Library library = libraryManager.getLibraryById(id);
 
-        libraryMapper.updateLibraryFromDto(request,library);
+
+        Library libraryToUpdate = libraryMapper.updateLibraryFromDto(request,library);
+
+        libraryManager.updateLibrary(libraryToUpdate);
 
         return libraryMapper.toResponse(library);
     }
@@ -129,6 +128,23 @@ public class LibraryService {
                 .id(savedLibraryClosures.getId())
                 .message("Library closure created successfully for " + library.getName())
                 .build();
+
+    }
+
+
+    public LibraryClosureResponse updateLibraryClosure(Long libraryId, Long closureId, @Valid UpdateLibraryClosureRequest request) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
+            throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
+        }
+
+        LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
+
+        return libraryClosuresMapper.toResponse(libraryClosures);
 
     }
 }
