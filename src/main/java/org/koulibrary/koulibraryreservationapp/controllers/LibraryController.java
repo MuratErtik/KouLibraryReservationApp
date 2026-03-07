@@ -113,6 +113,12 @@ public class LibraryController {
                 .body(response);
     }
 
+    @GetMapping("/{libraryId}/get-closure/{closureId}")
+    public ResponseEntity<LibraryClosureResponse> getLibraryClosureById(@PathVariable Long libraryId, @PathVariable Long closureId) {
+
+        return ResponseEntity.ok(libraryService.getLibraryClosureById(libraryId,closureId));
+    }
+
 
 
 
