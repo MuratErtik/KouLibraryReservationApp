@@ -119,6 +119,14 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getLibraryClosureById(libraryId,closureId));
     }
 
+    @GetMapping("/{libraryId}/get-all-closure")
+    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(
+            @PathVariable Long libraryId,
+            @PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getAllLibraryClosures(pageable,libraryId));
+    }
+
 
 
 
