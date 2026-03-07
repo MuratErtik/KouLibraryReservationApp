@@ -4,11 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryClosureRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryClosureResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -99,6 +97,19 @@ public class LibraryController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PatchMapping("/{libraryId}/update-closure/{closureId}")
+    public ResponseEntity<LibraryClosureResponse> updateLibraryClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long closureId,
+            @Valid @RequestBody UpdateLibraryClosureRequest request) {
+
+        LibraryClosureResponse response = libraryService.updateLibraryClosure(libraryId,closureId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 
