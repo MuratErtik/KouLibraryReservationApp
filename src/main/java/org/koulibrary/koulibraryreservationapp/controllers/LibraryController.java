@@ -93,7 +93,7 @@ public class LibraryController {
 
     //CRUD
     @PostMapping("/{libraryId}/create-closure")
-    public ResponseEntity<CreateLibraryClosureResponse> createLibraryClosure(@Valid @RequestBody CreateLibraryClosureRequest request,Long libraryId) {
+    public ResponseEntity<CreateLibraryClosureResponse> createLibraryClosure(@Valid @RequestBody CreateLibraryClosureRequest request, @PathVariable Long libraryId) {
 
         CreateLibraryClosureResponse response = libraryService.createLibraryClosure(request,libraryId);
 
