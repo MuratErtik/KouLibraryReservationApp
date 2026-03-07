@@ -13,6 +13,7 @@ public interface LibraryClosuresMapper {
     LibraryClosureResponse toResponse(LibraryClosures libraryClosures);
 
     @Mapping(target = "library",source = "library")
+    @Mapping(target = "id", ignore = true)
     LibraryClosures toEntity(CreateLibraryClosureRequest request, Library library);
 
 //    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
