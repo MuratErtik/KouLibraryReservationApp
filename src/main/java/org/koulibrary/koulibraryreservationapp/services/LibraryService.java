@@ -131,7 +131,6 @@ public class LibraryService {
 
     }
 
-
     public LibraryClosureResponse updateLibraryClosure(Long libraryId, Long closureId, @Valid UpdateLibraryClosureRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -150,5 +149,15 @@ public class LibraryService {
 
         return libraryClosuresMapper.toResponse(libraryClosures);
 
+    }
+
+
+    public LibraryClosureResponse getLibraryClosureById(Long libraryId, Long closureId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        return libraryClosuresMapper.toResponse(libraryClosures);
     }
 }
