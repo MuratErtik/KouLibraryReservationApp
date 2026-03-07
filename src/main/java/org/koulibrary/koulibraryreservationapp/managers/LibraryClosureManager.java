@@ -3,6 +3,7 @@ package org.koulibrary.koulibraryreservationapp.managers;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
+import org.koulibrary.koulibraryreservationapp.exceptions.IntervalDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryClosuresRepository;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class LibraryClosureManager {
                 libraryClosures.getStartDateTime(),
                 libraryClosures.getEndDateTime()
         )){
-            throw new DateTimeException("The library is already closed during this time interval.");
+            throw new IntervalDateException("The library is already closed during this time interval.");
         }
 
 
