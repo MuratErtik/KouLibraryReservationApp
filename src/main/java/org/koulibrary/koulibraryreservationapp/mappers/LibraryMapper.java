@@ -17,5 +17,5 @@ public interface LibraryMapper {
     Library toEntity(CreateLibraryRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateLibraryFromDto(UpdateLibraryRequest request, @MappingTarget Library library);
+    Library updateLibraryFromDto(UpdateLibraryRequest request, @MappingTarget Library library);
 }
