@@ -2,13 +2,14 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryClosureRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryClosureResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -87,5 +88,30 @@ public class LibraryController {
 
 
     }
+
+    //library closure endpoints
+
+    //CRUD
+    @PostMapping("/{libraryId}/create-closure")
+    public ResponseEntity<CreateLibraryClosureResponse> createLibraryClosure(@Valid @RequestBody CreateLibraryClosureRequest request,Long libraryId) {
+
+        CreateLibraryClosureResponse response = libraryService.createLibraryClosure(request,libraryId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
