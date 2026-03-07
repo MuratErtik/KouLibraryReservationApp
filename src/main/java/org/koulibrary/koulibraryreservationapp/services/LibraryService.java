@@ -186,4 +186,15 @@ public class LibraryService {
 
 
     }
+
+    public void deleteLibraryClosure(Long libraryId, Long closureId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        libraryClosureManager.deleteLibraryClosureId(closureId);
+
+
+    }
 }
