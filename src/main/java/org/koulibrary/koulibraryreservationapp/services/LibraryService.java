@@ -222,4 +222,22 @@ public class LibraryService {
                 .build();
 
     }
+
+    public LibraryWorkingHoursResponse updateLibraryWorkingHours(Long libraryId, Long workingHoursId, @Valid UpdateLibraryWorkingHoursRequest request) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
+            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
+        }
+
+        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+
+        LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
+
+        libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
+
+        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
+
+    }
 }
