@@ -240,4 +240,14 @@ public class LibraryService {
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
     }
+
+    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+
+        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
+
+    }
 }
