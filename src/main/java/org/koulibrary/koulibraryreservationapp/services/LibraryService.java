@@ -250,4 +250,27 @@ public class LibraryService {
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
     }
+
+    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingClosure(pageable,library);
+
+        List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
+                .map(libraryWorkingHoursMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryWorkingHoursResponse>builder()
+                .content(responses)
+                .pageNumber(libraryWorkingHours.getNumber())
+                .pageSize(libraryWorkingHours.getSize())
+                .totalElements(libraryWorkingHours.getTotalElements())
+                .totalPages(libraryWorkingHours.getTotalPages())
+                .isLast(libraryWorkingHours.isLast())
+                .build();
+
+    }
 }
