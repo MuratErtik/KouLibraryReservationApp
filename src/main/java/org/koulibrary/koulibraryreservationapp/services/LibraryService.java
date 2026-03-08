@@ -3,21 +3,22 @@ package org.koulibrary.koulibraryreservationapp.services;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryClosureRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 
 
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
+import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
+import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryClosuresMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryMapper;
+import org.koulibrary.koulibraryreservationapp.mappers.LibraryWorkingHoursMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,10 @@ public class LibraryService {
     private final LibraryClosuresMapper libraryClosuresMapper;
 
     private final LibraryClosureManager libraryClosureManager;
+
+    private final LibraryWorkingHoursMapper libraryWorkingHoursMapper;
+
+    private final LibraryWorkingHoursManager libraryWorkingHoursManager;
 
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
@@ -195,6 +200,26 @@ public class LibraryService {
 
         libraryClosureManager.deleteLibraryClosureId(closureId);
 
+
+    }
+
+    public CreateLibraryWorkingHourResponse createLibraryWorkingHour(@Valid CreateLibraryWorkingHourRequest request, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+
+        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
+            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
+        }
+
+        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursMapper.toEntity(request,library);
+
+        LibraryWorkingHours savedLibraryWorkingHour = libraryWorkingHoursManager.saveLibraryWorkingHours(libraryWorkingHours);
+
+        return CreateLibraryWorkingHourResponse.builder()
+                .id(savedLibraryWorkingHour.getId())
+                .message("Library working hours created successfully for " + library.getName())
+                .build();
 
     }
 }
