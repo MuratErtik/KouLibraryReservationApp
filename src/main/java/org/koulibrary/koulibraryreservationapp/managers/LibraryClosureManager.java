@@ -20,8 +20,6 @@ public class LibraryClosureManager {
 
     private final LibraryClosuresRepository libraryClosuresRepository;
 
-    private final LibraryManager libraryManager;
-
 
     @Transactional
     public LibraryClosures saveLibraryClosures(LibraryClosures libraryClosures) {
