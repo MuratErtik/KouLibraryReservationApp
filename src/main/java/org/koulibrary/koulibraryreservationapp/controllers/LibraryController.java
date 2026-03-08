@@ -2,10 +2,7 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryClosureRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateLibraryRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
 import org.springframework.data.domain.Pageable;
@@ -139,6 +136,17 @@ public class LibraryController {
 
     }
 
+
+    //library WorkingHours endpoints
+    @PostMapping("/{libraryId}/create-working-hours")
+    public ResponseEntity<CreateLibraryWorkingHourResponse> createLibraryWorkingHour(@Valid @RequestBody CreateLibraryWorkingHourRequest request, @PathVariable Long libraryId) {
+
+        CreateLibraryWorkingHourResponse response = libraryService.createLibraryWorkingHour(request,libraryId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
 
 
 
