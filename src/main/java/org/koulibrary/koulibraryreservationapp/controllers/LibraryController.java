@@ -179,4 +179,15 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable,libraryId));
     }
 
+
+    @DeleteMapping("/{libraryId}/delete-working-hours/{workingHoursId}")
+    public ResponseEntity<Void> deleteLibraryWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
+
+
+        libraryService.deleteLibraryWorkingHours(libraryId,workingHoursId);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
 }
