@@ -149,6 +149,18 @@ public class LibraryController {
     }
 
 
+    @PatchMapping("/{libraryId}/update-working-hours/{workingHoursId}")
+    public ResponseEntity<LibraryWorkingHoursResponse> updateLibraryWorkingHours(
+            @PathVariable Long libraryId,
+            @PathVariable Long workingHoursId,
+            @Valid @RequestBody UpdateLibraryWorkingHoursRequest request) {
+
+        LibraryWorkingHoursResponse response = libraryService.updateLibraryWorkingHours(libraryId,workingHoursId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 
 
 
