@@ -273,4 +273,14 @@ public class LibraryService {
                 .build();
 
     }
+
+    public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+
+        libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
+
+    }
 }
