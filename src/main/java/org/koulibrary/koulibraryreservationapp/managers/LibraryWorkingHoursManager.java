@@ -55,4 +55,8 @@ public class LibraryWorkingHoursManager {
     }
 
 
+    @Transactional
+    public void deleteLibraryWorkingHoursById(Long workingHoursId) {
+        libraryWorkingHoursRepository.deleteById(workingHoursId);
+    }
 }
