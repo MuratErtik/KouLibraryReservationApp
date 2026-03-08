@@ -1,8 +1,11 @@
 package org.koulibrary.koulibraryreservationapp.managers;
 
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
+import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryWorkingHoursAlreadyCreatedException;
+import org.koulibrary.koulibraryreservationapp.exceptions.LibraryWorkingHoursNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryWorkingHoursRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,4 +28,19 @@ public class LibraryWorkingHoursManager {
 
 
     }
+
+    @Transactional(readOnly = true)
+    public LibraryWorkingHours getLibraryWorkingHoursById(Long workingHoursId) {
+
+        return libraryWorkingHoursRepository.findById(workingHoursId).orElseThrow(
+                () -> new LibraryWorkingHoursNotFoundException("Library Working hours does not exist with id: " + workingHoursId));
+
+    }
+
+    @Transactional
+    public void updateLibraryWorkingHours(LibraryWorkingHours libraryWorkingHours) {
+        libraryWorkingHoursRepository.save(libraryWorkingHours);
+    }
+
+
 }
