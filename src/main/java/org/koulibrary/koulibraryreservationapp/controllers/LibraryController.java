@@ -171,5 +171,12 @@ public class LibraryController {
 
 
 
+    @GetMapping("/{libraryId}/get-all-working-hours")
+    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
+            @PathVariable Long libraryId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable,libraryId));
+    }
 
 }
