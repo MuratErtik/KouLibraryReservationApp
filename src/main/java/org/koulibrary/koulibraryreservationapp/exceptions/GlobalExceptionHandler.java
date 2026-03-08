@@ -120,6 +120,17 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(LibraryWorkingHoursNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleLibraryWorkingHoursNotFoundException(LibraryWorkingHoursNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
 
 
 
