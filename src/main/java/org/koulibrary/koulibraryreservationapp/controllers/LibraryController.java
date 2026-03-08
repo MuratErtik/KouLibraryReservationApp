@@ -163,7 +163,11 @@ public class LibraryController {
     }
 
 
+    @GetMapping("/{libraryId}/get-working-hours/{workingHoursId}")
+    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
 
+        return ResponseEntity.ok(libraryService.getLibraryWorkingHoursById(libraryId,workingHoursId));
+    }
 
 
 
