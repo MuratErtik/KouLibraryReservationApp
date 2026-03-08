@@ -98,6 +98,29 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(LibraryWorkingHoursAlreadyCreatedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorDetail handleLibraryWorkingHoursAlreadyCreatedException(LibraryWorkingHoursAlreadyCreatedException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(InvalidWorkingHourRangeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDetail handleInvalidWorkingHourRangeException(InvalidWorkingHourRangeException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
 
 
 
