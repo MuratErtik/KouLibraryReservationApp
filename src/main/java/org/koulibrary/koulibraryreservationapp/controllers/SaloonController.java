@@ -3,7 +3,11 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateSaloonRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateSaloonResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryClosureResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.SaloonResponse;
 import org.koulibrary.koulibraryreservationapp.services.SaloonService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +31,19 @@ public class SaloonController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PatchMapping("/update-saloon/{saloonId}")
+    public ResponseEntity<SaloonResponse> updateSaloon(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @Valid @RequestBody UpdateSaloonRequest request) {
+
+        SaloonResponse response = saloonService.updateSaloon(libraryId,saloonId,request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 
