@@ -36,6 +36,11 @@ public class Penalty {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
+    // it is null, that is mean it is a manuel penalty
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "checkpoint_id")
+    private Checkpoint checkpoint;
+
 
 
     @Enumerated(EnumType.STRING)
@@ -49,7 +54,7 @@ public class Penalty {
 
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime startTime;
+    private LocalDateTime startTime = LocalDateTime.now();
 
     @Column(nullable = false)
     private LocalDateTime endTime;
