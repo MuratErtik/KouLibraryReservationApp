@@ -1,0 +1,11 @@
+{
+  "name": "deneme",
+  "description": "Main library",
+  "address": "Umuttepe",
+  "maxActiveReservationsPerUser": 3,
+  "reservationWindowInDays": 7,
+  "checkInTimeoutMinutes": 15,
+  "checkpointIntervalMinutes": 60,
+  "checkpointGraceMinutes": 10,
+  "penaltyBlockDays": 3
+}
