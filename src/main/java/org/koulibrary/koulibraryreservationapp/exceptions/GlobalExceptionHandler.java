@@ -131,6 +131,18 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(SaloonAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorDetail handleSaloonAlreadyExistException(SaloonAlreadyExistException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
 
 
 
