@@ -48,6 +48,13 @@ public class SaloonController {
     }
 
 
+    @GetMapping("/get-saloon/{saloonId}")
+    public ResponseEntity<SaloonResponse> getSaloonById(@PathVariable Long libraryId, @PathVariable Long saloonId) {
+
+        return ResponseEntity.ok(saloonService.getSaloonById(libraryId,saloonId));
+    }
+
+
 
 
 
