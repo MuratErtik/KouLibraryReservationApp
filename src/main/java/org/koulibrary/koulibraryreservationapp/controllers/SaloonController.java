@@ -66,6 +66,17 @@ public class SaloonController {
     }
 
 
+    @DeleteMapping("/delete-saloon/{saloonId}")
+    public ResponseEntity<Void> deleteSaloon(@PathVariable Long libraryId, @PathVariable Long saloonId) {
+
+
+        saloonService.deleteSaloon(libraryId,saloonId);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
+
 
 
 
