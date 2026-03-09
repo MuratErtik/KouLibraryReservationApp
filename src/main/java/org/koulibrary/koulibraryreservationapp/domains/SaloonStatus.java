@@ -1,6 +1,6 @@
 package org.koulibrary.koulibraryreservationapp.domains;
 
-public enum RoomStatus {
+public enum SaloonStatus {
 
     OPEN,
     CLOSED,
