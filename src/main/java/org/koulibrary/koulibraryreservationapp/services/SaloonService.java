@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateSaloonRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateLibraryClosureResponse;
@@ -54,5 +55,14 @@ public class SaloonService {
         return saloonMapper.toResponse(saloon);
 
 
+    }
+
+    public SaloonResponse getSaloonById(Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        return saloonMapper.toResponse(saloon);
     }
 }
