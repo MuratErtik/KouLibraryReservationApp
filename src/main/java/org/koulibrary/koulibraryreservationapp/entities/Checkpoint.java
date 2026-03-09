@@ -42,7 +42,8 @@ public class Checkpoint {
 
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt=LocalDateTime.now();
 
+    //if it is null, that is mean user does not response.
     private LocalDateTime respondedAt;
 }
