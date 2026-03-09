@@ -3,6 +3,9 @@ package org.koulibrary.koulibraryreservationapp.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "libraries")
@@ -45,6 +48,25 @@ public class Library {
 
     @Column(nullable = false)
     private Integer penaltyBlockDays;
+
+    @Column(nullable = false)
+    private Integer slotDurationMinutes;
+
+    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LibraryWorkingHours> workingHours = new ArrayList<>();
+
+    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LibraryClosures> closures = new ArrayList<>();
+
+    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LibraryTimeSlot> timeSlots = new ArrayList<>();
+
+    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Saloon> saloons = new ArrayList<>();
 
 
 }
