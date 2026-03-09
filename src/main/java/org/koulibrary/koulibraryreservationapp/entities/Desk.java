@@ -49,4 +49,9 @@ public class Desk {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "qr_code_id", unique = true)
     private QrCode qrCode;
+
+    @Transient
+    public Library getLibrary() {
+        return saloon != null ? saloon.getLibrary() : null;
+    }
 }
