@@ -7,8 +7,11 @@ import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosur
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateSaloonResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryClosureResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.SaloonResponse;
 import org.koulibrary.koulibraryreservationapp.services.SaloonService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +55,14 @@ public class SaloonController {
     public ResponseEntity<SaloonResponse> getSaloonById(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
         return ResponseEntity.ok(saloonService.getSaloonById(libraryId,saloonId));
+    }
+
+    @GetMapping("/get-all-saloons")
+    public ResponseEntity<PageResponse<SaloonResponse>> getALlSaloons(
+            @PathVariable Long libraryId,
+            @PageableDefault(size = 10, sort = "library") Pageable pageable) {
+
+        return ResponseEntity.ok(saloonService.getAllSaloons(pageable,libraryId));
     }
 
 
