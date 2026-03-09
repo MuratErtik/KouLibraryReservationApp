@@ -1,0 +1,101 @@
+package org.koulibrary.koulibraryreservationapp.services;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateSaloonRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
+import org.koulibrary.koulibraryreservationapp.entities.Library;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
+import org.koulibrary.koulibraryreservationapp.entities.Saloon;
+import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
+import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
+import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
+import org.koulibrary.koulibraryreservationapp.mappers.SaloonMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class SaloonService {
+
+    private final LibraryManager libraryManager;
+
+    private final SaloonMapper saloonMapper;
+
+    private final SaloonManager saloonManager;
+
+
+    public CreateSaloonResponse createSaloon(@Valid CreateSaloonRequest request, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonMapper.toEntity(request,library);
+
+        Saloon savedSaloon = saloonManager.saveSaloon(saloon);
+
+        return CreateSaloonResponse.builder()
+                .id(savedSaloon.getId())
+                .message("Saloon created successfully for " + library.getName())
+                .build();
+    }
+
+    public SaloonResponse updateSaloon(Long libraryId, Long saloonId, @Valid UpdateSaloonRequest request) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        Saloon saloonToUpdate = saloonMapper.updateSaloonFromDto(request,saloon);
+
+        saloonManager.updateSaloon(saloonToUpdate);
+
+        return saloonMapper.toResponse(saloon);
+
+
+    }
+
+    public SaloonResponse getSaloonById(Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        return saloonMapper.toResponse(saloon);
+    }
+
+    public PageResponse<SaloonResponse> getAllSaloons(Pageable pageable, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+
+        Page<Saloon> saloons = saloonManager.getAllSaloons(pageable,library);
+
+        List<SaloonResponse> responses = saloons.getContent().stream()
+                .map(saloonMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<SaloonResponse>builder()
+                .content(responses)
+                .pageNumber(saloons.getNumber())
+                .pageSize(saloons.getSize())
+                .totalElements(saloons.getTotalElements())
+                .totalPages(saloons.getTotalPages())
+                .isLast(saloons.isLast())
+                .build();
+    }
+
+    public void deleteSaloon(Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        saloonManager.deleteSaloonById(saloonId);
+    }
+}

@@ -3,7 +3,7 @@ package org.koulibrary.koulibraryreservationapp.entities;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.*;
-import org.koulibrary.koulibraryreservationapp.domains.RoomStatus;
+import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -29,7 +29,7 @@ public class Saloon {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoomStatus status;
+    private SaloonStatus status;
 
     private Integer floor;
 
