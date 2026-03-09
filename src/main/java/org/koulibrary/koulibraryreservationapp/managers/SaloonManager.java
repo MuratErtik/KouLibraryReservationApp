@@ -50,4 +50,9 @@ public class SaloonManager {
 
         return saloonRepository.findByLibrary(library,pageable);
     }
+
+    @Transactional
+    public void deleteSaloonById(Long saloonId) {
+        saloonRepository.deleteById(saloonId);
+    }
 }
