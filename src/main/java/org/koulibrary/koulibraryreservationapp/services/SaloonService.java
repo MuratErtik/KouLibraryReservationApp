@@ -89,4 +89,13 @@ public class SaloonService {
                 .isLast(saloons.isLast())
                 .build();
     }
+
+    public void deleteSaloon(Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        saloonManager.deleteSaloonById(saloonId);
+    }
 }
