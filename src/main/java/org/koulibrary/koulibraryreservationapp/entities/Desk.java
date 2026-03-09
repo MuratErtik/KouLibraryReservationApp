@@ -42,9 +42,9 @@ public class Desk {
     @JoinColumn(name = "saloon_id", nullable = false)
     private Saloon saloon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "library_id", nullable = false)
-    private Library library;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "library_id", nullable = false)
+//    private Library library;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "qr_code_id", unique = true)
