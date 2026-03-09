@@ -6,6 +6,7 @@ import lombok.*;
 import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -45,6 +46,10 @@ public class Saloon {
     //private LocalTime openingTime;
 
     //private LocalTime closingTime;
+
+    @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SaloonWorkingHours> workingHours = new ArrayList<>();
 
     @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL)
     private Set<Desk> tables;

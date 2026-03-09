@@ -6,5 +6,6 @@ public enum ReservationStatus {
     SUSPENDED,  // checkpoint has omitted
     CANCELLED,
     COMPLETED,
+    PENALIZED,
     NO_SHOW // check in fail
 }

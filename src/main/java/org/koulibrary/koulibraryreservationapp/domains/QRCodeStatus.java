@@ -4,5 +4,6 @@ public enum QRCodeStatus {
 
     ACTIVE,
     INACTIVE, //temporarily
-    REVOKED
+    REVOKED,
+    EXPIRED
 }

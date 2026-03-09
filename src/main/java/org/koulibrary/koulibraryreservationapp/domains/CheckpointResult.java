@@ -4,5 +4,8 @@ public enum CheckpointResult {
 
     CONFIRMED,  //
     MISSED,     // time is up, no response
-    FAILED
+    FAILED,
+    RESPONDED,
+    LATE,           // grace period içinde cevapladı,
+    EVICTED         // masa boşaltıldı
 }

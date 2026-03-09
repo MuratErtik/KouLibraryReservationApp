@@ -1,0 +1,1 @@
+ALTER TABLE desks DROP COLUMN IF EXISTS library_id;
