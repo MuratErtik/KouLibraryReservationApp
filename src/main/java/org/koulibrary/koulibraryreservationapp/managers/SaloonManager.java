@@ -1,10 +1,14 @@
 package org.koulibrary.koulibraryreservationapp.managers;
 
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.entities.Library;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.Saloon;
 import org.koulibrary.koulibraryreservationapp.exceptions.SaloonAlreadyExistException;
 import org.koulibrary.koulibraryreservationapp.exceptions.SaloonNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.SaloonRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +42,12 @@ public class SaloonManager {
     @Transactional
     public void updateSaloon(Saloon saloonToUpdate) {
         saloonRepository.save(saloonToUpdate);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Saloon> getAllSaloons(Pageable pageable, Library library) {
+
+
+        return saloonRepository.findByLibrary(library,pageable);
     }
 }
