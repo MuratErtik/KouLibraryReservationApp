@@ -49,7 +49,7 @@ public class LibraryWorkingHoursManager {
 
 
     @Transactional(readOnly = true)
-    public Page<LibraryWorkingHours> getAllLibraryWorkingClosure(Pageable pageable, Library library) {
+    public Page<LibraryWorkingHours> getAllLibraryWorkingHours(Pageable pageable, Library library) {
 
         return libraryWorkingHoursRepository.findByLibrary(library,pageable);
     }
