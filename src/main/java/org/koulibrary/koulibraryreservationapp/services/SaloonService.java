@@ -3,16 +3,17 @@ package org.koulibrary.koulibraryreservationapp.services;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateSaloonRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
-import org.koulibrary.koulibraryreservationapp.entities.Library;
-import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
-import org.koulibrary.koulibraryreservationapp.entities.Saloon;
+import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
+import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
+import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
+import org.koulibrary.koulibraryreservationapp.managers.SaloonWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.mappers.SaloonMapper;
+import org.koulibrary.koulibraryreservationapp.mappers.SaloonWorkingHoursMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,10 @@ public class SaloonService {
     private final SaloonMapper saloonMapper;
 
     private final SaloonManager saloonManager;
+
+    private final SaloonWorkingHoursMapper saloonWorkingHoursMapper;
+
+    private final SaloonWorkingHoursManager saloonWorkingHoursManager;
 
 
     public CreateSaloonResponse createSaloon(@Valid CreateSaloonRequest request, Long libraryId) {
@@ -98,4 +103,91 @@ public class SaloonService {
 
         saloonManager.deleteSaloonById(saloonId);
     }
+
+    public CreateSaloonWorkingHourResponse createLibraryWorkingHour(@Valid CreateSaloonWorkingHourRequest request, Long libraryId, Long saloonId) {
+
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+
+        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
+            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
+        }
+
+        SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursMapper.toEntity(request,saloon);
+
+        SaloonWorkingHours savedsaloonWorkingHours = saloonWorkingHoursManager.saveSaloonWorkingHours(saloonWorkingHours);
+
+        return CreateSaloonWorkingHourResponse.builder()
+                .id(savedsaloonWorkingHours.getId())
+                .message("Saloon working hours created successfully for " + saloon.getName())
+                .build();
+
+
+    }
+
+
+
+//    public LibraryWorkingHoursResponse updateLibraryWorkingHours(Long libraryId, Long workingHoursId, @Valid UpdateLibraryWorkingHoursRequest request) {
+//
+//        Library library = libraryManager.getLibraryById(libraryId);
+//
+//        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
+//            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
+//        }
+//
+//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+//
+//        LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
+//
+//        libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
+//
+//        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
+//
+//    }
+//
+//    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
+//
+//        Library library = libraryManager.getLibraryById(libraryId);
+//
+//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+//
+//        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
+//
+//    }
+//
+//    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
+//
+//        Library library = libraryManager.getLibraryById(libraryId);
+//
+//
+//        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingClosure(pageable,library);
+//
+//        List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
+//                .map(libraryWorkingHoursMapper::toResponse)
+//                .toList();
+//
+//
+//        return PageResponse.<LibraryWorkingHoursResponse>builder()
+//                .content(responses)
+//                .pageNumber(libraryWorkingHours.getNumber())
+//                .pageSize(libraryWorkingHours.getSize())
+//                .totalElements(libraryWorkingHours.getTotalElements())
+//                .totalPages(libraryWorkingHours.getTotalPages())
+//                .isLast(libraryWorkingHours.isLast())
+//                .build();
+//
+//    }
+//
+//    public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
+//
+//        Library library = libraryManager.getLibraryById(libraryId);
+//
+//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+//
+//        libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
+//
+//    }
 }
