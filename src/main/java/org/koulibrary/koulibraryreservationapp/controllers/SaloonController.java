@@ -87,18 +87,19 @@ public class SaloonController {
     }
 
 
-//    @PatchMapping("/{saloonId}/update-working-hours/{workingHoursId}")
-//    public ResponseEntity<LibraryWorkingHoursResponse> updateLibraryWorkingHours(
-//            @PathVariable Long libraryId,
-//            @PathVariable Long workingHoursId,
-//            @Valid @RequestBody UpdateLibraryWorkingHoursRequest request) {
-//
-//        LibraryWorkingHoursResponse response = libraryService.updateLibraryWorkingHours(libraryId,workingHoursId, request);
-//
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(response);
-//    }
+    @PatchMapping("/{saloonId}/update-working-hours/{workingHoursId}")
+    public ResponseEntity<SaloonWorkingHoursResponse> updateSaloonWorkingHours(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long workingHoursId,
+            @Valid @RequestBody UpdateSaloonWorkingHoursRequest request) {
+
+        SaloonWorkingHoursResponse response = saloonService.updateSaloonWorkingHours(libraryId,saloonId,workingHoursId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 //
 //
 //    @GetMapping("/{libraryId}/get-working-hours/{workingHoursId}")
