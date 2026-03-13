@@ -128,25 +128,29 @@ public class SaloonService {
 
     }
 
+    public SaloonWorkingHoursResponse updateSaloonWorkingHours(Long libraryId, Long saloonId, Long workingHoursId,
+                                                               @Valid UpdateSaloonWorkingHoursRequest request) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
+            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
+        }
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        SaloonWorkingHours saloonWorkingHoursToUpdate = saloonWorkingHoursMapper.updateSaloonWorkingHoursFromDto(request,saloonWorkingHours);
+
+        saloonWorkingHoursManager.updateSaloonWorkingHours(saloonWorkingHoursToUpdate);
+
+        return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
+
+    }
 
 
-//    public LibraryWorkingHoursResponse updateLibraryWorkingHours(Long libraryId, Long workingHoursId, @Valid UpdateLibraryWorkingHoursRequest request) {
-//
-//        Library library = libraryManager.getLibraryById(libraryId);
-//
-//        if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
-//            throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
-//        }
-//
-//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
-//
-//        LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
-//
-//        libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
-//
-//        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
-//
-//    }
+
 //
 //    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
 //
