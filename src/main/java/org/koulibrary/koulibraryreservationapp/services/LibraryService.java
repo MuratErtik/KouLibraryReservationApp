@@ -256,7 +256,7 @@ public class LibraryService {
         Library library = libraryManager.getLibraryById(libraryId);
 
 
-        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingClosure(pageable,library);
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHours(pageable,library);
 
         List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
                 .map(libraryWorkingHoursMapper::toResponse)
