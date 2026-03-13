@@ -186,9 +186,16 @@ public class GlobalExceptionHandler {
     }
 
 
-
-
-
+    @ExceptionHandler(SaloonWorkingHoursNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleSaloonWorkingHoursNotFoundException(SaloonWorkingHoursNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 
 
 
