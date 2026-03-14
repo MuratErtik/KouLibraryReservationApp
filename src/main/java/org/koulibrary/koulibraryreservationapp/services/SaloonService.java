@@ -184,14 +184,15 @@ public class SaloonService {
 
     }
 
-//
-//    public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
-//
-//        Library library = libraryManager.getLibraryById(libraryId);
-//
-//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
-//
-//        libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
-//
-//    }
+    public void deleteSaloonWorkingHours(Long libraryId, Long saloonId, Long workingHoursId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        saloonWorkingHoursManager.deleteSaloonWorkingHoursById(workingHoursId);
+    }
+
 }
