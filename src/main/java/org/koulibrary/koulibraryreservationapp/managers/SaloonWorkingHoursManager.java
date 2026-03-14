@@ -1,21 +1,31 @@
 package org.koulibrary.koulibraryreservationapp.managers;
 
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.WorkingHoursResponse;
+import org.koulibrary.koulibraryreservationapp.entities.Library;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
 import org.koulibrary.koulibraryreservationapp.entities.Saloon;
 import org.koulibrary.koulibraryreservationapp.entities.SaloonWorkingHours;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryWorkingHoursAlreadyCreatedException;
 import org.koulibrary.koulibraryreservationapp.exceptions.SaloonWorkingHoursNotFoundException;
+import org.koulibrary.koulibraryreservationapp.exceptions.WorkingHoursNotFoundException;
+import org.koulibrary.koulibraryreservationapp.repositories.LibraryWorkingHoursRepository;
 import org.koulibrary.koulibraryreservationapp.repositories.SaloonWorkingHoursRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+
 @Component
 @RequiredArgsConstructor
 public class SaloonWorkingHoursManager {
 
     private final SaloonWorkingHoursRepository saloonWorkingHoursRepository;
+
+    private final LibraryWorkingHoursRepository libraryWorkingHoursRepository;
 
 
     @Transactional
@@ -33,9 +43,9 @@ public class SaloonWorkingHoursManager {
     @Transactional(readOnly = true)
     public SaloonWorkingHours getSaloonWorkingHoursById(Long saloonWorkingHoursId) {
 
-        return saloonWorkingHoursRepository.findById(saloonWorkingHoursId).orElseThrow(
-                () -> new SaloonWorkingHoursNotFoundException("Saloon Working hours does not exist with id: " + saloonWorkingHoursId));
-
+        return saloonWorkingHoursRepository.findById(saloonWorkingHoursId)
+                .orElseThrow(() -> new SaloonWorkingHoursNotFoundException(
+                        "Working hours does not exist in Saloon or Library with id: " + saloonWorkingHoursId));
     }
 
     @Transactional
