@@ -110,16 +110,16 @@ public class SaloonController {
     }
 
 
-//
-//
-//
-//    @GetMapping("/{libraryId}/get-all-working-hours")
-//    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
-//            @PathVariable Long libraryId,
-//            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-//
-//        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable,libraryId));
-//    }
+
+    @GetMapping("/{saloonId}/get-all-working-hours")
+    public ResponseEntity<PageResponse<SaloonWorkingHoursResponse>> getAllSaloonWorkingHours(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        return ResponseEntity.ok(saloonService.getAllLibrarySaloonHours(pageable,libraryId,saloonId));
+    }
+
 //
 //
 //    @DeleteMapping("/{libraryId}/delete-working-hours/{workingHoursId}")
