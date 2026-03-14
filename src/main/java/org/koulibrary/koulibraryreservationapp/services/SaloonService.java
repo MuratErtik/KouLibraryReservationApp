@@ -160,32 +160,30 @@ public class SaloonService {
         return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
     }
 
+    public PageResponse<SaloonWorkingHoursResponse> getAllLibrarySaloonHours(Pageable pageable, Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
 
 
+        Page<SaloonWorkingHours> saloonWorkingHours = saloonWorkingHoursManager.getAllSaloonWorkingHours(pageable,saloon);
 
-//
-//    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
-//
-//        Library library = libraryManager.getLibraryById(libraryId);
-//
-//
-//        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingClosure(pageable,library);
-//
-//        List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
-//                .map(libraryWorkingHoursMapper::toResponse)
-//                .toList();
-//
-//
-//        return PageResponse.<LibraryWorkingHoursResponse>builder()
-//                .content(responses)
-//                .pageNumber(libraryWorkingHours.getNumber())
-//                .pageSize(libraryWorkingHours.getSize())
-//                .totalElements(libraryWorkingHours.getTotalElements())
-//                .totalPages(libraryWorkingHours.getTotalPages())
-//                .isLast(libraryWorkingHours.isLast())
-//                .build();
-//
-//    }
+        List<SaloonWorkingHoursResponse> responses = saloonWorkingHours.getContent().stream()
+                .map(saloonWorkingHoursMapper::toResponse)
+                .toList();
+
+        return PageResponse.<SaloonWorkingHoursResponse>builder()
+                .content(responses)
+                .pageNumber(saloonWorkingHours.getNumber())
+                .pageSize(saloonWorkingHours.getSize())
+                .totalElements(saloonWorkingHours.getTotalElements())
+                .totalPages(saloonWorkingHours.getTotalPages())
+                .isLast(saloonWorkingHours.isLast())
+                .build();
+
+    }
+
 //
 //    public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
 //
