@@ -100,13 +100,16 @@ public class SaloonController {
                 .status(HttpStatus.OK)
                 .body(response);
     }
-//
-//
-//    @GetMapping("/{libraryId}/get-working-hours/{workingHoursId}")
-//    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
-//
-//        return ResponseEntity.ok(libraryService.getLibraryWorkingHoursById(libraryId,workingHoursId));
-//    }
+
+
+    @GetMapping("/{saloonId}/get-working-hours/{workingHoursId}")
+    public ResponseEntity<SaloonWorkingHoursResponse> getSaloonWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
+                                                                                @PathVariable Long saloonId) {
+
+        return ResponseEntity.ok(saloonService.getSaloonWorkingHoursById(libraryId,saloonId,workingHoursId));
+    }
+
+
 //
 //
 //
