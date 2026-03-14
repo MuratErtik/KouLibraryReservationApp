@@ -120,17 +120,18 @@ public class SaloonController {
         return ResponseEntity.ok(saloonService.getAllLibrarySaloonHours(pageable,libraryId,saloonId));
     }
 
-//
-//
-//    @DeleteMapping("/{libraryId}/delete-working-hours/{workingHoursId}")
-//    public ResponseEntity<Void> deleteLibraryWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
-//
-//
-//        libraryService.deleteLibraryWorkingHours(libraryId,workingHoursId);
-//        return ResponseEntity.noContent().build();
-//
-//
-//    }
+
+
+    @DeleteMapping("/{saloonId}/delete-working-hours/{workingHoursId}")
+    public ResponseEntity<Void> deleteSaloonWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
+                                                         @PathVariable Long saloonId) {
+
+
+        saloonService.deleteSaloonWorkingHours(libraryId,saloonId,workingHoursId);
+        return ResponseEntity.noContent().build();
+
+
+    }
 
 
 
