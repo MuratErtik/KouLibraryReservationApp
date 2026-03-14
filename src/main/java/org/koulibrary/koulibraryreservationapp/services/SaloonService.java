@@ -149,18 +149,20 @@ public class SaloonService {
 
     }
 
+    public SaloonWorkingHoursResponse getSaloonWorkingHoursById(Long libraryId, Long saloonId, Long workingHoursId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
+    }
 
 
-//
-//    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
-//
-//        Library library = libraryManager.getLibraryById(libraryId);
-//
-//        LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
-//
-//        return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
-//
-//    }
+
+
 //
 //    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
 //
