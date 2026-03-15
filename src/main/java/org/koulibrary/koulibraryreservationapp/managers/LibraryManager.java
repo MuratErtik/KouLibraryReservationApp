@@ -30,7 +30,18 @@ public class LibraryManager {
 
     @Transactional
     public void updateLibrary(Library library) {
-         libraryRepository.save(library);
+        libraryRepository.save(library);
+    }
+
+    @Transactional
+    public void checkNameConflict(Library library, String requestName) {
+        if (!library.getName().equals(requestName)) {
+            if (libraryRepository.existsByName(requestName)) {
+                throw new LibraryAlreadyExistsException(
+                        "Library with name " + requestName + " already exists"
+                );
+            }
+        }
     }
 
     @Transactional(readOnly = true)
