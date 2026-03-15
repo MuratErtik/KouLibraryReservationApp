@@ -128,6 +128,8 @@ public class LibraryService {
             throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
         }
 
+
+
         LibraryClosures libraryClosures = libraryClosuresMapper.toEntity(request,library);
 
         LibraryClosures savedLibraryClosures = libraryClosureManager.saveLibraryClosures(libraryClosures);
@@ -150,6 +152,8 @@ public class LibraryService {
         }
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        libraryClosureManager.checkDateIntervalConflict(library,libraryClosures,request.getStartDateTime(),request.getEndDateTime());
 
         LibraryClosures libraryClosuresToUpdate = libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
 
