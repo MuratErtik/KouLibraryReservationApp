@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -31,5 +34,11 @@ public class LibraryResponse {
     private Integer checkpointGraceMinutes; //after the checkpoints ready how many minutes later user must scan the checkpoint.
 
     private Integer penaltyBlockDays;
+
+    private Integer slotDurationMinutes;
+
+    private List<LibraryWorkingHoursResponseForLibrary> workingHours;
+
+
 
 }
