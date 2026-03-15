@@ -116,12 +116,18 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getLibraryClosureById(libraryId,closureId));
     }
 
-    @GetMapping("/{libraryId}/get-all-closure")
-    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(
+    @GetMapping("/{libraryId}/get-all-closure-by-library")
+    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosureByLibrary(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
 
-        return ResponseEntity.ok(libraryService.getAllLibraryClosures(pageable,libraryId));
+        return ResponseEntity.ok(libraryService.getAllLibraryClosuresByLibrary(pageable,libraryId));
+    }
+
+    @GetMapping("/get-all-closure")
+    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(@PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getAllLibraryClosures(pageable));
     }
 
 
