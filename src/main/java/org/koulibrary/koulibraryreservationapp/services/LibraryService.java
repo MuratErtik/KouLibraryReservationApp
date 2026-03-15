@@ -173,12 +173,12 @@ public class LibraryService {
         return libraryClosuresMapper.toResponse(libraryClosures);
     }
 
-    public PageResponse<LibraryClosureResponse> getAllLibraryClosures(Pageable pageable,Long libraryId) {
+    public PageResponse<LibraryClosureResponse> getAllLibraryClosuresByLibrary(Pageable pageable,Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
 
-        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosures(pageable,library);
+        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosuresByLibrary(pageable,library);
 
         List<LibraryClosureResponse> responses = libraryClosures.getContent().stream()
                 .map(libraryClosuresMapper::toResponse)
@@ -288,5 +288,25 @@ public class LibraryService {
 
         libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
 
+    }
+
+    public PageResponse<LibraryClosureResponse> getAllLibraryClosures(Pageable pageable) {
+
+
+        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosures(pageable);
+
+        List<LibraryClosureResponse> responses = libraryClosures.getContent().stream()
+                .map(libraryClosuresMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryClosureResponse>builder()
+                .content(responses)
+                .pageNumber(libraryClosures.getNumber())
+                .pageSize(libraryClosures.getSize())
+                .totalElements(libraryClosures.getTotalElements())
+                .totalPages(libraryClosures.getTotalPages())
+                .isLast(libraryClosures.isLast())
+                .build();
     }
 }
