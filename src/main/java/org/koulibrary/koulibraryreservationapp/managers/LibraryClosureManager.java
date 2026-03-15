@@ -54,10 +54,17 @@ public class LibraryClosureManager {
     }
 
     @Transactional(readOnly = true)
-    public Page<LibraryClosures> getAllLibraryClosures(Pageable pageable,Library library) {
+    public Page<LibraryClosures> getAllLibraryClosuresByLibrary(Pageable pageable,Library library) {
 
 
         return libraryClosuresRepository.findByLibrary(library,pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LibraryClosures> getAllLibraryClosures(Pageable pageable) {
+
+
+        return libraryClosuresRepository.findAll(pageable);
     }
 
     @Transactional
