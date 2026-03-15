@@ -41,4 +41,8 @@ public class CreateLibraryRequest {
     @NotNull(message = "Penalty block days is required")
     @Min(value = 1, message = "Penalty block days must be at least 1 day")
     private Integer penaltyBlockDays;
+
+    @NotNull(message = "Slot duration minutes is required")
+    @Positive(message = "Slot duration timeout must be a positive number")
+    private Integer slotDurationMinutes;
 }
