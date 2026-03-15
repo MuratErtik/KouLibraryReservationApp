@@ -100,6 +100,8 @@ public class LibraryService {
 
         Library library = libraryManager.getLibraryById(id);
 
+        //you must check before the mapper because of that updated library object already flushed in DB
+        libraryManager.checkNameConflict(library, request.getName());
 
         Library libraryToUpdate = libraryMapper.updateLibraryFromDto(request,library);
 
