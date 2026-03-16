@@ -257,12 +257,12 @@ public class LibraryService {
 
     }
 
-    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
+    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHoursByLibrary(Pageable pageable, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
 
-        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHours(pageable,library);
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHoursByLibrary(pageable,library);
 
         List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
                 .map(libraryWorkingHoursMapper::toResponse)
@@ -308,5 +308,27 @@ public class LibraryService {
                 .totalPages(libraryClosures.getTotalPages())
                 .isLast(libraryClosures.isLast())
                 .build();
+    }
+
+    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable) {
+
+
+
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHours(pageable);
+
+        List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
+                .map(libraryWorkingHoursMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryWorkingHoursResponse>builder()
+                .content(responses)
+                .pageNumber(libraryWorkingHours.getNumber())
+                .pageSize(libraryWorkingHours.getSize())
+                .totalElements(libraryWorkingHours.getTotalElements())
+                .totalPages(libraryWorkingHours.getTotalPages())
+                .isLast(libraryWorkingHours.isLast())
+                .build();
+
     }
 }
