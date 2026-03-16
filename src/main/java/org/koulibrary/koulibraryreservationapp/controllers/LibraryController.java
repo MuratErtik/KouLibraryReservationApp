@@ -178,11 +178,17 @@ public class LibraryController {
 
 
     @GetMapping("/{libraryId}/get-all-working-hours")
-    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
+    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHoursByLibrary(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
-        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable,libraryId));
+        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHoursByLibrary(pageable,libraryId));
+    }
+
+    @GetMapping("/get-all-working-hours")
+    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable));
     }
 
 
