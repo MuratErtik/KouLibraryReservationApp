@@ -247,9 +247,9 @@ public class LibraryService {
 
     }
 
-    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
+    public LibraryWorkingHoursResponse getLibraryWorkingHoursById( Long workingHoursId) {
 
-        Library library = libraryManager.getLibraryById(libraryId);
+//        Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
 
