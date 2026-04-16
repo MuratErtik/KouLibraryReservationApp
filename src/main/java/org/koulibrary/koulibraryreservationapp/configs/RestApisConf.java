@@ -10,6 +10,10 @@ public class RestApisConf {
 
     public static final String LIBRARYCONTROLLER = DEVELOPER+VERSIONS+"/libraries";
 
+    public static final String LIBRARYCLOSURECONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/library-closures";
+
+    public static final String LIBRARYWORKINGHOURSCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/library-working-hours";
+
     public static final String SALOONCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}"+"/saloons";
 
     public static final String DESKCONTROLLER = SALOONCONTROLLER+"/{saloonId}"+"/desks";
