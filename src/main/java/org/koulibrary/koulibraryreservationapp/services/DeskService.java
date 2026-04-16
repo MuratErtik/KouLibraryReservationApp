@@ -8,6 +8,7 @@ import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateDeskResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.DeskResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.SaloonResponse;
 import org.koulibrary.koulibraryreservationapp.entities.Desk;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
@@ -16,7 +17,11 @@ import org.koulibrary.koulibraryreservationapp.managers.DeskManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
 import org.koulibrary.koulibraryreservationapp.mappers.DeskMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -80,4 +85,31 @@ public class DeskService {
         return deskMapper.toResponse(desk);
 
     }
+
+    public PageResponse<DeskResponse> getAllDesks(Pageable pageable, Long saloonId, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        Page<Desk> desks = deskManager.getAllDesks(pageable,saloon);
+
+
+
+
+        List<DeskResponse> responses = desks.getContent().stream()
+                .map(deskMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<DeskResponse>builder()
+                .content(responses)
+                .pageNumber(desks.getNumber())
+                .pageSize(desks.getSize())
+                .totalElements(desks.getTotalElements())
+                .totalPages(desks.getTotalPages())
+                .isLast(desks.isLast())
+                .build();
+    }
+
 }

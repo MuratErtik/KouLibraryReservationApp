@@ -6,6 +6,8 @@ import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.services.DeskService;
 import org.koulibrary.koulibraryreservationapp.services.LibraryService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +53,15 @@ public class DeskController {
         return ResponseEntity.ok(deskService.getDeskById(libraryId,saloonId,deskId));
     }
 
+
+    @GetMapping("/get-all-desk")
+    public ResponseEntity<PageResponse<DeskResponse>> getAllDesk(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PageableDefault(size = 10, sort = "deskNumber") Pageable pageable) {
+
+        return ResponseEntity.ok(deskService.getAllDesks(pageable,saloonId,libraryId));
+    }
 
 
 

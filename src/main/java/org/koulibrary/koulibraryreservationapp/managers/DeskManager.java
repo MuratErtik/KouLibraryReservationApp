@@ -6,10 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.entities.Desk;
 
 import org.koulibrary.koulibraryreservationapp.entities.Library;
+import org.koulibrary.koulibraryreservationapp.entities.Saloon;
 import org.koulibrary.koulibraryreservationapp.exceptions.DeskAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.exceptions.DeskNotFoundException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.repositories.DeskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,5 +53,11 @@ public class DeskManager {
                 throw new DeskAlreadyExistsException("Desk already exists with name: " + desk.getDeskNumber());
             }
         }
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<Desk> getAllDesks(Pageable pageable, Saloon saloon) {
+        return deskRepository.findBySaloon(saloon, pageable);
     }
 }
