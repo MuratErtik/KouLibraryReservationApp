@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
@@ -65,6 +66,18 @@ public class DeskService {
         deskManager.updateDesk(deskToUpdate);
 
         return deskMapper.toResponse(deskToUpdate);
+
+    }
+
+    public DeskResponse getDeskById(Long libraryId, Long saloonId, Long deskId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        Desk desk = deskManager.getDeskById(deskId);
+
+        return deskMapper.toResponse(desk);
 
     }
 }

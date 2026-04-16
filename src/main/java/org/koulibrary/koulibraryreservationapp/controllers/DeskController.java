@@ -45,6 +45,12 @@ public class DeskController {
                 .body(response);
     }
 
+    @GetMapping("/get-desk/{deskId}")
+    public ResponseEntity<DeskResponse> getDeskById(@PathVariable Long libraryId, @PathVariable Long saloonId, @PathVariable Long deskId) {
+
+        return ResponseEntity.ok(deskService.getDeskById(libraryId,saloonId,deskId));
+    }
+
 
 
 
