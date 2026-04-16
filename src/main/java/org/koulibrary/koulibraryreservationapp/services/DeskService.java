@@ -112,4 +112,16 @@ public class DeskService {
                 .build();
     }
 
+
+
+    public void deleteDesk(Long libraryId, Long saloonId, Long deskId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        Desk desk = deskManager.getDeskById(deskId);
+
+        deskManager.deleteDeskById(deskId);
+    }
 }

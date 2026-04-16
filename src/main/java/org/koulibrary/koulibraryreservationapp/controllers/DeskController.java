@@ -63,6 +63,16 @@ public class DeskController {
         return ResponseEntity.ok(deskService.getAllDesks(pageable,saloonId,libraryId));
     }
 
+    @DeleteMapping("/delete-desk/{deskId}")
+    public ResponseEntity<Void> deleteDesk(@PathVariable Long libraryId, @PathVariable Long saloonId, @PathVariable Long deskId) {
+
+
+        deskService.deleteDesk(libraryId,saloonId,deskId);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
 
 
 

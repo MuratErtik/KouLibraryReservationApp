@@ -60,4 +60,9 @@ public class DeskManager {
     public Page<Desk> getAllDesks(Pageable pageable, Saloon saloon) {
         return deskRepository.findBySaloon(saloon, pageable);
     }
+
+    @Transactional
+    public void deleteDeskById(Long deskId) {
+        deskRepository.deleteById(deskId);
+    }
 }
