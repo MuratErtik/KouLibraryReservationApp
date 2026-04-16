@@ -225,4 +225,18 @@ public class GlobalExceptionHandler {
 
 
 
+    @ExceptionHandler(DeskNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleDeskNotFoundException(DeskNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
 }
