@@ -273,6 +273,17 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(ClosureDoesNotBelongToThisSaloon.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleClosureDoesNotBelongToThisSaloon(ClosureDoesNotBelongToThisSaloon ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
 
 
 
