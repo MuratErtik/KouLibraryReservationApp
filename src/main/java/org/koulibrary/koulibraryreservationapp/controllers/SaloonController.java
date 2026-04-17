@@ -32,7 +32,7 @@ public class SaloonController {
                 .body(response);
     }
 
-    @PatchMapping(SALOONCONTROLLER+"/{saloonId}")
+    @PatchMapping("/{saloonId}")
     public ResponseEntity<SaloonResponse> updateSaloon(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
@@ -46,14 +46,14 @@ public class SaloonController {
     }
 
 
-    @GetMapping(SALOONCONTROLLER+"/{saloonId}")
+    @GetMapping("/{saloonId}")
     public ResponseEntity<SaloonResponse> getSaloonById(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
         return ResponseEntity.ok(saloonService.getSaloonById(libraryId,saloonId));
     }
 
     //by library
-    @GetMapping(SALOONCONTROLLER)
+    @GetMapping()
     public ResponseEntity<PageResponse<SaloonResponse>> getALlSaloons(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "library") Pageable pageable) {
@@ -62,7 +62,7 @@ public class SaloonController {
     }
 
 
-    @DeleteMapping(SALOONCONTROLLER+"/{saloonId}")
+    @DeleteMapping("/{saloonId}")
     public ResponseEntity<Void> deleteSaloon(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
 
