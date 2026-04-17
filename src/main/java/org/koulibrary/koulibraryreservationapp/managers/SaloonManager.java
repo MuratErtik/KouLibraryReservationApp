@@ -55,4 +55,11 @@ public class SaloonManager {
     public void deleteSaloonById(Long saloonId) {
         saloonRepository.deleteById(saloonId);
     }
+
+    public boolean findDuplicate(Long libraryId, Integer floorToCheck, String nameToCheck, Long saloonId) {
+        return saloonRepository.existsByLibraryIdAndFloorAndNameAndIdNot(
+                libraryId, floorToCheck, nameToCheck, saloonId
+        );
+
+    }
 }

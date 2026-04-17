@@ -22,6 +22,7 @@ public interface SaloonMapper {
     @Mapping(target = "status", constant = "OPEN")
     @Mapping(target = "tables", ignore = true)
     @Mapping(target = "workingHours", ignore = true)
+    @Mapping(target = "capacity",source = "request.capacity")
     Saloon toEntity(CreateSaloonRequest request, Library library);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -8,6 +8,8 @@ import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
+import org.koulibrary.koulibraryreservationapp.exceptions.SaloonAlreadyExistException;
+import org.koulibrary.koulibraryreservationapp.exceptions.SaloonDoesNotBelongToLibraryException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
@@ -52,16 +54,25 @@ public class SaloonService {
     public SaloonResponse updateSaloon(Long libraryId, Long saloonId, @Valid UpdateSaloonRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
-
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
-        Saloon saloonToUpdate = saloonMapper.updateSaloonFromDto(request,saloon);
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
+        String nameToCheck = request.getName() != null ? request.getName() : saloon.getName();
+        Integer floorToCheck = request.getFloor() != null ? request.getFloor() : saloon.getFloor();
+
+        boolean duplicate = saloonManager.findDuplicate(libraryId,floorToCheck,nameToCheck,saloonId);
+
+        if (duplicate) {
+            throw new SaloonAlreadyExistException("A saloon with the same name already exists on floor " + floorToCheck);
+        }
+
+        Saloon saloonToUpdate = saloonMapper.updateSaloonFromDto(request, saloon);
         saloonManager.updateSaloon(saloonToUpdate);
 
-        return saloonMapper.toResponse(saloon);
-
-
+        return saloonMapper.toResponse(saloonToUpdate);
     }
 
     public SaloonResponse getSaloonById(Long libraryId, Long saloonId) {
