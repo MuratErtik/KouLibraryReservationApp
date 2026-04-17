@@ -262,5 +262,18 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(SaloonDoesNotBelongToLibraryException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleSaloonDoesNotBelongToLibraryException(SaloonDoesNotBelongToLibraryException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
 
 }
