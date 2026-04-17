@@ -175,6 +175,10 @@ public class LibraryService {
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
 
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
+
         return libraryClosuresMapper.toResponse(libraryClosures);
     }
 
@@ -208,6 +212,10 @@ public class LibraryService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
 
         libraryClosureManager.deleteLibraryClosureId(closureId);
 
