@@ -32,7 +32,7 @@ public class SaloonController {
                 .body(response);
     }
 
-    @PatchMapping("/update-saloon/{saloonId}")
+    @PatchMapping(SALOONCONTROLLER+"/{saloonId}")
     public ResponseEntity<SaloonResponse> updateSaloon(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
@@ -46,13 +46,14 @@ public class SaloonController {
     }
 
 
-    @GetMapping("/get-saloon/{saloonId}")
+    @GetMapping(SALOONCONTROLLER+"/{saloonId}")
     public ResponseEntity<SaloonResponse> getSaloonById(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
         return ResponseEntity.ok(saloonService.getSaloonById(libraryId,saloonId));
     }
 
-    @GetMapping("/get-all-saloons")
+    //by library
+    @GetMapping(SALOONCONTROLLER)
     public ResponseEntity<PageResponse<SaloonResponse>> getALlSaloons(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "library") Pageable pageable) {
@@ -61,7 +62,7 @@ public class SaloonController {
     }
 
 
-    @DeleteMapping("/delete-saloon/{saloonId}")
+    @DeleteMapping(SALOONCONTROLLER+"/{saloonId}")
     public ResponseEntity<Void> deleteSaloon(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
 
@@ -70,6 +71,25 @@ public class SaloonController {
 
 
     }
+
+    //saloonclosure endpoint starting...
+
+
+
+
+
+    //saloonclosure endpoint ending...
+
+
+
+
+
+
+
+
+
+
+
 
     // saloon working hours endpoints....
 
