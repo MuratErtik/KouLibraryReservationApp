@@ -2,18 +2,15 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.*;
-import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
-import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
-import org.koulibrary.koulibraryreservationapp.exceptions.SaloonAlreadyExistException;
-import org.koulibrary.koulibraryreservationapp.exceptions.SaloonDoesNotBelongToLibraryException;
+import org.koulibrary.koulibraryreservationapp.exceptions.*;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
-import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
+import org.koulibrary.koulibraryreservationapp.managers.SaloonClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonWorkingHoursManager;
+import org.koulibrary.koulibraryreservationapp.mappers.SaloonClosureMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.SaloonMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.SaloonWorkingHoursMapper;
 import org.springframework.data.domain.Page;
@@ -35,6 +32,10 @@ public class SaloonService {
     private final SaloonWorkingHoursMapper saloonWorkingHoursMapper;
 
     private final SaloonWorkingHoursManager saloonWorkingHoursManager;
+
+    private final SaloonClosureMapper saloonClosureMapper;
+
+    private final SaloonClosureManager saloonClosureManager;
 
 
     public CreateSaloonResponse createSaloon(@Valid CreateSaloonRequest request, Long libraryId) {
@@ -122,6 +123,109 @@ public class SaloonService {
 
         saloonManager.deleteSaloonById(saloonId);
     }
+
+    // --- Saloon Closure Methods ---
+
+    public CreateSaloonClosureResponse createSaloonClosure(@Valid CreateSaloonClosureRequest request, Long saloonId,Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
+            throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
+        }
+
+        SaloonClosure saloonClosure = saloonClosureMapper.toEntity(request, saloon);
+
+        SaloonClosure savedSaloonClosure = saloonClosureManager.saveSaloonClosure(saloonClosure);
+
+        return CreateSaloonClosureResponse.builder()
+                .id(savedSaloonClosure.getId())
+                .message("Saloon closure created successfully for " + saloon.getName())
+                .build();
+    }
+
+    public SaloonClosureResponse updateSaloonClosure(Long libraryId,Long saloonId, Long closureId, @Valid UpdateSaloonClosureRequest request) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (request.getEndDateTime() != null && request.getStartDateTime() != null) {
+            if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
+                throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
+            }
+        }
+
+        SaloonClosure saloonClosure = saloonClosureManager.getSaloonClosureById(closureId);
+
+        if (!saloonClosure.getSaloon().getId().equals(saloonId)) {
+            throw new ClosureDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the closure");
+        }
+
+        saloonClosureManager.checkDateIntervalConflict(saloon, saloonClosure, request.getStartDateTime(), request.getEndDateTime());
+
+        SaloonClosure saloonClosureToUpdate = saloonClosureMapper.updateSaloonClosureFromDto(request, saloonClosure);
+
+        saloonClosureManager.updateSaloonClosure(saloonClosureToUpdate);
+
+        return saloonClosureMapper.toResponse(saloonClosureToUpdate);
+    }
+
+    public SaloonClosureResponse getSaloonClosureById(Long libraryId,Long saloonId, Long closureId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        SaloonClosure saloonClosure = saloonClosureManager.getSaloonClosureById(closureId);
+
+        if (!saloonClosure.getSaloon().getId().equals(saloonId)) {
+            throw new ClosureDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the closure");
+        }
+
+        return saloonClosureMapper.toResponse(saloonClosure);
+    }
+
+    public PageResponse<SaloonClosureResponse> getAllSaloonClosuresBySaloon(Pageable pageable,Long libraryId, Long saloonId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        Page<SaloonClosure> saloonClosures = saloonClosureManager.getAllSaloonClosureBySaloon(pageable, saloon);
+
+        List<SaloonClosureResponse> responses = saloonClosures.getContent().stream()
+                .map(saloonClosureMapper::toResponse)
+                .toList();
+
+        return PageResponse.<SaloonClosureResponse>builder()
+                .content(responses)
+                .pageNumber(saloonClosures.getNumber())
+                .pageSize(saloonClosures.getSize())
+                .totalElements(saloonClosures.getTotalElements())
+                .totalPages(saloonClosures.getTotalPages())
+                .isLast(saloonClosures.isLast())
+                .build();
+    }
+
+    public void deleteSaloonClosure(Long saloonId, Long closureId) {
+        saloonManager.getSaloonById(saloonId);
+
+        SaloonClosure saloonClosure = saloonClosureManager.getSaloonClosureById(closureId);
+
+        if (!saloonClosure.getSaloon().getId().equals(saloonId)) {
+            throw new ClosureDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the closure");
+        }
+
+        saloonClosureManager.deleteSaloonClosureId(closureId);
+    }
+
+
+
+
+
 
     public CreateSaloonWorkingHourResponse createLibraryWorkingHour(@Valid CreateSaloonWorkingHourRequest request, Long libraryId, Long saloonId) {
 

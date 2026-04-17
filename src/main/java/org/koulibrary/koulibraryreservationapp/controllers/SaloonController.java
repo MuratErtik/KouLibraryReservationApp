@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.SALOONCLOSURECONTROLLER;
 import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.SALOONCONTROLLER;
 
 @RestController
@@ -75,7 +76,60 @@ public class SaloonController {
     //saloonclosure endpoint starting...
 
 
+    @PostMapping(SALOONCLOSURECONTROLLER)
+    public ResponseEntity<CreateSaloonClosureResponse> createSaloonClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @Valid @RequestBody CreateSaloonClosureRequest request) {
 
+        CreateSaloonClosureResponse response = saloonService.createSaloonClosure(request, saloonId,libraryId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PatchMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
+    public ResponseEntity<SaloonClosureResponse> updateSaloonClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId,
+            @Valid @RequestBody UpdateSaloonClosureRequest request) {
+
+        SaloonClosureResponse response = saloonService.updateSaloonClosure(libraryId,saloonId, closureId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
+    public ResponseEntity<SaloonClosureResponse> getSaloonClosureById(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId) {
+
+        return ResponseEntity.ok(saloonService.getSaloonClosureById(libraryId,saloonId, closureId));
+    }
+
+    @GetMapping(SALOONCLOSURECONTROLLER)
+    public ResponseEntity<PageResponse<SaloonClosureResponse>> getAllSaloonClosureBySaloon(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
+
+        return ResponseEntity.ok(saloonService.getAllSaloonClosuresBySaloon(pageable,libraryId ,saloonId));
+    }
+
+
+    @DeleteMapping("/{closureId}")
+    public ResponseEntity<Void> deleteSaloonClosure(
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId) {
+
+        saloonService.deleteSaloonClosure(saloonId, closureId);
+        return ResponseEntity.noContent().build();
+    }
 
 
     //saloonclosure endpoint ending...
