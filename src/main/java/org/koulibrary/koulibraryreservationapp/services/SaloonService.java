@@ -81,6 +81,10 @@ public class SaloonService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
         return saloonMapper.toResponse(saloon);
     }
 
@@ -111,6 +115,10 @@ public class SaloonService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
         saloonManager.deleteSaloonById(saloonId);
     }
