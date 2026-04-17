@@ -238,5 +238,16 @@ public class GlobalExceptionHandler {
 
 
 
+    @ExceptionHandler(ClosureDoesNotBelongToThisLibrary.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleClosureDoesNotBelongToThisLibrary(ClosureDoesNotBelongToThisLibrary ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
 
 }

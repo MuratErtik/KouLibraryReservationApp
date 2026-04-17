@@ -10,6 +10,7 @@ import org.koulibrary.koulibraryreservationapp.entities.Library;
 
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
+import org.koulibrary.koulibraryreservationapp.exceptions.ClosureDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
@@ -152,6 +153,10 @@ public class LibraryService {
         }
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
+
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
 
         libraryClosureManager.checkDateIntervalConflict(library,libraryClosures,request.getStartDateTime(),request.getEndDateTime());
 
