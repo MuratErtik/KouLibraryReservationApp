@@ -13,6 +13,7 @@ import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
 import org.koulibrary.koulibraryreservationapp.exceptions.ClosureDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
+import org.koulibrary.koulibraryreservationapp.exceptions.WorkingHoursDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 
@@ -252,6 +253,10 @@ public class LibraryService {
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
 
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
+
         LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
 
         libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
@@ -260,11 +265,15 @@ public class LibraryService {
 
     }
 
-    public LibraryWorkingHoursResponse getLibraryWorkingHoursById( Long workingHoursId) {
+    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId,Long workingHoursId) {
 
-//        Library library = libraryManager.getLibraryById(libraryId);
+        Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
 
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
@@ -298,6 +307,10 @@ public class LibraryService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
+
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
 
         libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
 

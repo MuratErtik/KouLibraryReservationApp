@@ -250,4 +250,17 @@ public class GlobalExceptionHandler {
     }
 
 
+
+    @ExceptionHandler(WorkingHoursDoesNotBelongToThisLibrary.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleWorkingHoursDoesNotBelongToThisLibrary(WorkingHoursDoesNotBelongToThisLibrary ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
 }

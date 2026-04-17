@@ -123,6 +123,7 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getAllLibraryClosuresByLibrary(pageable,libraryId));
     }
 
+    //this method is unnecessary but should be useful for the future!
     @GetMapping(LIBRARYCLOSURECONTROLLER)
     public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(@PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
 
@@ -169,10 +170,10 @@ public class LibraryController {
     }
 
 
-    @GetMapping("/get-working-hours-by-library/{workingHoursId}")
-    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long workingHoursId) {
+    @GetMapping(LIBRARYWORKINGHOURSCONTROLLER+"/{workingHoursId}")
+    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long libraryId,@PathVariable Long workingHoursId) {
 
-        return ResponseEntity.ok(libraryService.getLibraryWorkingHoursById(workingHoursId));
+        return ResponseEntity.ok(libraryService.getLibraryWorkingHoursById(libraryId,workingHoursId));
     }
 
 
@@ -185,6 +186,7 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getAllLibraryWorkingHoursByLibrary(pageable,libraryId));
     }
 
+    //this method is unnecessary but should be useful for the future!
     @GetMapping(LIBRARYWORKINGHOURSCONTROLLER)
     public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
