@@ -122,27 +122,18 @@ public class SaloonController {
     }
 
 
-    @DeleteMapping("/{closureId}")
+    @DeleteMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
     public ResponseEntity<Void> deleteSaloonClosure(
+            @PathVariable Long libraryId,
             @PathVariable Long saloonId,
             @PathVariable Long closureId) {
 
-        saloonService.deleteSaloonClosure(saloonId, closureId);
+        saloonService.deleteSaloonClosure(libraryId,saloonId, closureId);
         return ResponseEntity.noContent().build();
     }
 
 
     //saloonclosure endpoint ending...
-
-
-
-
-
-
-
-
-
-
 
 
     // saloon working hours endpoints....
