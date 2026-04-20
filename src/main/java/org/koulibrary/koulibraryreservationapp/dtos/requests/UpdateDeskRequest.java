@@ -14,16 +14,16 @@ import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 @Builder
 public class UpdateDeskRequest {
 
-    @NotNull(message = "Desk number cannot be null.")
+    //@NotNull(message = "Desk number cannot be null.")
     @Positive(message = "Desk number must be a positive value.")
     private Integer deskNumber;
 
-    @NotNull(message = "Desk status is required.")
+    //@NotNull(message = "Desk status is required.")
     private DeskStatus status;
 
-    @NotNull(message = "Desk policy is required.")
+    //@NotNull(message = "Desk policy is required.")
     private DeskPolicy policy;
 
-    @NotNull(message = "Power socket information must be specified.")
+    //@NotNull(message = "Power socket information must be specified.")
     private Boolean hasPowerSocket;
 }
