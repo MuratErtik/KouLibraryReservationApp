@@ -17,6 +17,8 @@ public interface SaloonClosureMapper {
     @Mapping(source = "saloon.id", target = "saloonId")
     @Mapping(source = "saloon.name", target = "saloonName")
     @Mapping(target = "isActive", expression = "java(checkIsActive(saloonClosures))")
+    @Mapping(source = "saloon.library.id",target = "libraryId")
+    @Mapping(source = "saloon.library.name",target = "libraryName")
     SaloonClosureResponse toResponse(SaloonClosure saloonClosures);
 
     @Mapping(target = "saloon",source = "saloon")
