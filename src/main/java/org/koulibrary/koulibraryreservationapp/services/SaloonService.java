@@ -146,7 +146,7 @@ public class SaloonService {
 
         return CreateSaloonClosureResponse.builder()
                 .id(savedSaloonClosure.getId())
-                .message("Saloon closure created successfully for " + saloon.getName())
+                .message("Saloon closure created successfully for Saloon: " + saloon.getName()+" Library: " + library.getName())
                 .build();
     }
 
@@ -206,6 +206,10 @@ public class SaloonService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
         Page<SaloonClosure> saloonClosures = saloonClosureManager.getAllSaloonClosureBySaloon(pageable, saloon);
 
