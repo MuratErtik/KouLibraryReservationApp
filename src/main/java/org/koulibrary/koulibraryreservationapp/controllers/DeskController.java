@@ -33,7 +33,7 @@ public class DeskController {
     }
 
 
-    @PatchMapping("/update-desk/{deskId}")
+    @PatchMapping("/{deskId}")
     public ResponseEntity<DeskResponse> updateDesk(
             @PathVariable Long deskId,
             @PathVariable Long libraryId,
@@ -47,14 +47,14 @@ public class DeskController {
                 .body(response);
     }
 
-    @GetMapping("/get-desk/{deskId}")
+    @GetMapping("/{deskId}")
     public ResponseEntity<DeskResponse> getDeskById(@PathVariable Long libraryId, @PathVariable Long saloonId, @PathVariable Long deskId) {
 
         return ResponseEntity.ok(deskService.getDeskById(libraryId,saloonId,deskId));
     }
 
 
-    @GetMapping("/get-all-desk")
+    @GetMapping
     public ResponseEntity<PageResponse<DeskResponse>> getAllDesk(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
@@ -63,7 +63,7 @@ public class DeskController {
         return ResponseEntity.ok(deskService.getAllDesks(pageable,saloonId,libraryId));
     }
 
-    @DeleteMapping("/delete-desk/{deskId}")
+    @DeleteMapping("/{deskId}")
     public ResponseEntity<Void> deleteDesk(@PathVariable Long libraryId, @PathVariable Long saloonId, @PathVariable Long deskId) {
 
 
