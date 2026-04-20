@@ -50,7 +50,7 @@ public class DeskManager {
 
         if (!desk.getDeskNumber().equals(deskNumber)) {
             if (deskRepository.existsByDeskNumber(deskNumber)) {
-                throw new DeskAlreadyExistsException("Desk already exists with name: " + desk.getDeskNumber());
+                throw new DeskAlreadyExistsException("Desk already exists with name: " + deskNumber);
             }
         }
     }
