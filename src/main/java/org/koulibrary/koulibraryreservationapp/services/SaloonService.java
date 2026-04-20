@@ -132,6 +132,10 @@ public class SaloonService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
         if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
             throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
         }
@@ -151,6 +155,11 @@ public class SaloonService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
         if (request.getEndDateTime() != null && request.getStartDateTime() != null) {
             if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
@@ -178,6 +187,10 @@ public class SaloonService {
         Library library = libraryManager.getLibraryById(libraryId);
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
         SaloonClosure saloonClosure = saloonClosureManager.getSaloonClosureById(closureId);
 
@@ -210,8 +223,16 @@ public class SaloonService {
                 .build();
     }
 
-    public void deleteSaloonClosure(Long saloonId, Long closureId) {
-        saloonManager.getSaloonById(saloonId);
+    public void deleteSaloonClosure(Long libraryId,Long saloonId, Long closureId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
 
         SaloonClosure saloonClosure = saloonClosureManager.getSaloonClosureById(closureId);
 
