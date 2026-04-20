@@ -284,6 +284,18 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(WorkingHoursDoesNotBelongToThisSaloon.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleWorkingHoursDoesNotBelongToThisSaloon(WorkingHoursDoesNotBelongToThisSaloon ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
 
 
 
