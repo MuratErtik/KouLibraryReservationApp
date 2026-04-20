@@ -259,6 +259,10 @@ public class SaloonService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
 
         if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
             throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
@@ -270,7 +274,7 @@ public class SaloonService {
 
         return CreateSaloonWorkingHourResponse.builder()
                 .id(savedsaloonWorkingHours.getId())
-                .message("Saloon working hours created successfully for " + saloon.getName())
+                .message("Saloon working hours created successfully for " + saloon.getName()+" and library " + library.getName())
                 .build();
 
 
@@ -281,13 +285,23 @@ public class SaloonService {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
         if (!request.getClosingTime().isAfter(request.getOpeningTime())) {
             throw new InvalidWorkingHourRangeException("Closing time must be after opening time");
         }
 
-        Saloon saloon = saloonManager.getSaloonById(saloonId);
 
         SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        if (!saloonWorkingHours.getSaloon().getId().equals(saloonId)) {
+            throw new WorkingHoursDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the workinghours with id " + workingHoursId);
+        }
 
         SaloonWorkingHours saloonWorkingHoursToUpdate = saloonWorkingHoursMapper.updateSaloonWorkingHoursFromDto(request,saloonWorkingHours);
 
@@ -303,16 +317,29 @@ public class SaloonService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
         SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        if (!saloonWorkingHours.getSaloon().getId().equals(saloonId)) {
+            throw new WorkingHoursDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the workinghours with id " + workingHoursId);
+        }
 
         return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
     }
 
-    public PageResponse<SaloonWorkingHoursResponse> getAllLibrarySaloonHours(Pageable pageable, Long libraryId, Long saloonId) {
+    public PageResponse<SaloonWorkingHoursResponse> getAllWorkingHoursBySaloon(Pageable pageable, Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
 
 
         Page<SaloonWorkingHours> saloonWorkingHours = saloonWorkingHoursManager.getAllSaloonWorkingHours(pageable,saloon);
@@ -338,7 +365,15 @@ public class SaloonService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+        if (!saloon.getLibrary().getId().equals(libraryId)) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon does not belong to the library with id " + libraryId);
+        }
+
         SaloonWorkingHours saloonWorkingHours = saloonWorkingHoursManager.getSaloonWorkingHoursById(workingHoursId);
+
+        if (!saloonWorkingHours.getSaloon().getId().equals(saloonId)) {
+            throw new WorkingHoursDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the workinghours with id " + workingHoursId);
+        }
 
         saloonWorkingHoursManager.deleteSaloonWorkingHoursById(workingHoursId);
     }

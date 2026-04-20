@@ -11,8 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.SALOONCLOSURECONTROLLER;
-import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.SALOONCONTROLLER;
+import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.*;
 
 @RestController
 @RequestMapping(SALOONCONTROLLER)
@@ -139,7 +138,7 @@ public class SaloonController {
     // saloon working hours endpoints....
 
 
-    @PostMapping("/{saloonId}/create-working-hours")
+    @PostMapping(SALOONWORKINGHOURSCONTROLLER)
     public ResponseEntity<CreateSaloonWorkingHourResponse> createSaloonWorkingHour(@Valid @RequestBody CreateSaloonWorkingHourRequest request,
                                                                                    @PathVariable Long libraryId,
                                                                                    @PathVariable Long saloonId) {
@@ -152,7 +151,7 @@ public class SaloonController {
     }
 
 
-    @PatchMapping("/{saloonId}/update-working-hours/{workingHoursId}")
+    @PatchMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
     public ResponseEntity<SaloonWorkingHoursResponse> updateSaloonWorkingHours(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
@@ -167,7 +166,7 @@ public class SaloonController {
     }
 
 
-    @GetMapping("/{saloonId}/get-working-hours/{workingHoursId}")
+    @GetMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
     public ResponseEntity<SaloonWorkingHoursResponse> getSaloonWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
                                                                                 @PathVariable Long saloonId) {
 
@@ -176,18 +175,18 @@ public class SaloonController {
 
 
 
-    @GetMapping("/{saloonId}/get-all-working-hours")
+    @GetMapping(SALOONWORKINGHOURSCONTROLLER)
     public ResponseEntity<PageResponse<SaloonWorkingHoursResponse>> getAllSaloonWorkingHours(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
-        return ResponseEntity.ok(saloonService.getAllLibrarySaloonHours(pageable,libraryId,saloonId));
+        return ResponseEntity.ok(saloonService.getAllWorkingHoursBySaloon(pageable,libraryId,saloonId));
     }
 
 
 
-    @DeleteMapping("/{saloonId}/delete-working-hours/{workingHoursId}")
+    @DeleteMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
     public ResponseEntity<Void> deleteSaloonWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
                                                          @PathVariable Long saloonId) {
 
