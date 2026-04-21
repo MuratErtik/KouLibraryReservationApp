@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateDeskResponse;
@@ -21,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -118,6 +121,10 @@ public class DeskService {
 
         Saloon saloon = saloonManager.getSaloonById(saloonId);
 
+        if (!saloon.getLibrary().getId().equals(library.getId())) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon with id "+saloonId+" doesn't belong to library with id: " + libraryId);
+        }
+
         Page<Desk> desks = deskManager.getAllDesks(pageable,saloon);
 
 
@@ -158,5 +165,26 @@ public class DeskService {
         }
 
         deskManager.deleteDeskById(deskId);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<DeskResponse> getAllDeskWithoutPagination(Long saloonId, Long libraryId) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(library.getId())) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon with id "+saloonId+" doesn't belong to library with id: " + libraryId);
+        }
+
+        Set<Desk> desks = deskManager.getAllDesks(saloon);
+
+        Set<DeskResponse> responses = new HashSet<>();
+
+        desks.forEach(desk -> responses.add(deskMapper.toResponse(desk)));
+
+        return responses;
+
     }
 }

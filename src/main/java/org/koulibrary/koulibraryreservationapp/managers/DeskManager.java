@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class DeskManager {
@@ -52,6 +54,10 @@ public class DeskManager {
 
     public Page<Desk> getAllDesks(Pageable pageable, Saloon saloon) {
         return deskRepository.findBySaloon(saloon, pageable);
+    }
+
+    public Set<Desk> getAllDesks(Saloon saloon) {
+        return deskRepository.findBySaloon(saloon);
     }
 
 

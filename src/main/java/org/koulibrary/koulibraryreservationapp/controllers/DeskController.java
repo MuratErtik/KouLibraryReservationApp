@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.DESKCONTROLLER;
 
 @RestController
@@ -54,13 +56,22 @@ public class DeskController {
     }
 
 
-    @GetMapping
+    // pagination for admin's future abilities.
+    @GetMapping("/admin")
     public ResponseEntity<PageResponse<DeskResponse>> getAllDesk(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
             @PageableDefault(size = 10, sort = "deskNumber") Pageable pageable) {
 
         return ResponseEntity.ok(deskService.getAllDesks(pageable,saloonId,libraryId));
+    }
+
+    // pagination for admin's future abilities.
+    @GetMapping("/user")
+    public ResponseEntity<Set<DeskResponse>> getAllDeskWithoutPagination(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId) {
+        return ResponseEntity.ok(deskService.getAllDeskWithoutPagination(saloonId,libraryId));
     }
 
     @DeleteMapping("/{deskId}")
