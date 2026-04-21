@@ -9,9 +9,12 @@ import org.koulibrary.koulibraryreservationapp.exceptions.DeskNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.DeskRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -63,5 +66,15 @@ public class DeskManager {
 
     public void deleteDeskById(Long deskId) {
         deskRepository.deleteById(deskId);
+    }
+
+    public Page<Desk> getAllDesksWithSpec(Pageable pageable, Specification<Desk> specification) {
+
+        return  deskRepository.findAll(specification,pageable);
+    }
+
+    public Set<Desk> getAllDesksWithSpec(Specification<Desk> specification) {
+
+        return new HashSet<>(deskRepository.findAll(specification));
     }
 }

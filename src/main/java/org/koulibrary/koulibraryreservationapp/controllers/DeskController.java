@@ -2,6 +2,8 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.domains.DeskPolicy;
+import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.services.DeskService;
@@ -66,12 +68,37 @@ public class DeskController {
         return ResponseEntity.ok(deskService.getAllDesks(pageable,saloonId,libraryId));
     }
 
-    // pagination for admin's future abilities.
+    // not pagination for user's future abilities.
     @GetMapping("/user")
     public ResponseEntity<Set<DeskResponse>> getAllDeskWithoutPagination(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId) {
         return ResponseEntity.ok(deskService.getAllDeskWithoutPagination(saloonId,libraryId));
+    }
+
+
+    // pagination for admin's future abilities.
+    @GetMapping("/admin/filter")
+    public ResponseEntity<PageResponse<DeskResponse>> getAllDeskByFilter(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @RequestParam(required = false) DeskPolicy deskPolicy,
+            @RequestParam(required = false) DeskStatus deskStatus,
+            @RequestParam(required = false) Boolean hasPowerSocket,
+            @PageableDefault(size = 10, sort = "deskNumber") Pageable pageable) {
+
+        return ResponseEntity.ok(deskService.getAllDeskByFilter(pageable,saloonId,libraryId,deskPolicy,deskStatus,hasPowerSocket));
+    }
+
+    // not pagination for user's future abilities.
+    @GetMapping("/user/filter")
+    public ResponseEntity<Set<DeskResponse>> getAllDeskByFilterWithoutPagination(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @RequestParam(required = false) DeskPolicy deskPolicy,
+            @RequestParam(required = false) DeskStatus deskStatus,
+            @RequestParam(required = false) Boolean hasPowerSocket) {
+        return ResponseEntity.ok(deskService.getAllDeskByFilterWithoutPagination(saloonId,libraryId,deskPolicy,deskStatus,hasPowerSocket));
     }
 
     @DeleteMapping("/{deskId}")

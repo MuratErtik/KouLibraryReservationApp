@@ -2,7 +2,8 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
+import org.koulibrary.koulibraryreservationapp.domains.DeskPolicy;
+import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateDeskRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateDeskResponse;
@@ -17,8 +18,10 @@ import org.koulibrary.koulibraryreservationapp.managers.DeskManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
 import org.koulibrary.koulibraryreservationapp.managers.SaloonManager;
 import org.koulibrary.koulibraryreservationapp.mappers.DeskMapper;
+import org.koulibrary.koulibraryreservationapp.specifications.DeskSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -186,5 +189,88 @@ public class DeskService {
 
         return responses;
 
+    }
+
+    public  PageResponse<DeskResponse> getAllDeskByFilter(Pageable pageable, Long saloonId, Long libraryId,
+                                                          DeskPolicy deskPolicy, DeskStatus deskStatus,Boolean hasPowerSocket) {
+
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(library.getId())) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon with id "+saloonId+" doesn't belong to library with id: " + libraryId);
+        }
+
+        Specification<Desk> specification = (root,query,criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (deskPolicy != null)
+            specification = specification.and(DeskSpecification.deskPolicy(deskPolicy));
+
+        if (deskStatus != null)
+            specification = specification.and(DeskSpecification.deskStatus(deskStatus));
+
+
+        if (hasPowerSocket != null)
+            specification = specification.and(DeskSpecification.hasDeskPowerSocket(hasPowerSocket));
+
+        specification = specification.and(DeskSpecification.saloon(saloon));
+
+        Page<Desk> desks = deskManager.getAllDesksWithSpec(pageable,specification);
+
+
+        List<DeskResponse> responses = desks.getContent().stream()
+                .map(deskMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<DeskResponse>builder()
+                .content(responses)
+                .pageNumber(desks.getNumber())
+                .pageSize(desks.getSize())
+                .totalElements(desks.getTotalElements())
+                .totalPages(desks.getTotalPages())
+                .isLast(desks.isLast())
+                .build();
+
+
+
+    }
+
+
+    public Set<DeskResponse> getAllDeskByFilterWithoutPagination(Long saloonId, Long libraryId,
+                                                                 DeskPolicy deskPolicy, DeskStatus deskStatus,Boolean hasPowerSocket) {
+
+        Library library = libraryManager.getLibraryById(libraryId);
+
+        Saloon saloon = saloonManager.getSaloonById(saloonId);
+
+        if (!saloon.getLibrary().getId().equals(library.getId())) {
+            throw new SaloonDoesNotBelongToLibraryException("Saloon with id "+saloonId+" doesn't belong to library with id: " + libraryId);
+        }
+
+        Specification<Desk> specification = (root,query,criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (deskPolicy != null)
+            specification = specification.and(DeskSpecification.deskPolicy(deskPolicy));
+
+        if (deskStatus != null)
+            specification = specification.and(DeskSpecification.deskStatus(deskStatus));
+
+
+        if (hasPowerSocket != null)
+            specification = specification.and(DeskSpecification.hasDeskPowerSocket(hasPowerSocket));
+
+        specification = specification.and(DeskSpecification.saloon(saloon));
+
+        Set<Desk> desks = deskManager.getAllDesksWithSpec(specification);
+
+
+        Set<DeskResponse> responses = new HashSet<>();
+
+        desks.forEach(desk -> responses.add(deskMapper.toResponse(desk)));
+
+        return responses;
     }
 }
