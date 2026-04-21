@@ -16,6 +16,7 @@ import org.koulibrary.koulibraryreservationapp.mappers.SaloonWorkingHoursMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class SaloonService {
 
     private final SaloonClosureManager saloonClosureManager;
 
-
+    @Transactional
     public CreateSaloonResponse createSaloon(@Valid CreateSaloonRequest request, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -52,6 +53,7 @@ public class SaloonService {
                 .build();
     }
 
+    @Transactional
     public SaloonResponse updateSaloon(Long libraryId, Long saloonId, @Valid UpdateSaloonRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -76,6 +78,7 @@ public class SaloonService {
         return saloonMapper.toResponse(saloonToUpdate);
     }
 
+    @Transactional(readOnly = true)
     public SaloonResponse getSaloonById(Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -89,6 +92,7 @@ public class SaloonService {
         return saloonMapper.toResponse(saloon);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<SaloonResponse> getAllSaloons(Pageable pageable, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -111,6 +115,7 @@ public class SaloonService {
                 .build();
     }
 
+    @Transactional
     public void deleteSaloon(Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -126,6 +131,7 @@ public class SaloonService {
 
     // --- Saloon Closure Methods ---
 
+    @Transactional
     public CreateSaloonClosureResponse createSaloonClosure(@Valid CreateSaloonClosureRequest request, Long saloonId,Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -150,6 +156,7 @@ public class SaloonService {
                 .build();
     }
 
+    @Transactional
     public SaloonClosureResponse updateSaloonClosure(Long libraryId,Long saloonId, Long closureId, @Valid UpdateSaloonClosureRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -182,6 +189,7 @@ public class SaloonService {
         return saloonClosureMapper.toResponse(saloonClosureToUpdate);
     }
 
+    @Transactional(readOnly = true)
     public SaloonClosureResponse getSaloonClosureById(Long libraryId,Long saloonId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -201,6 +209,7 @@ public class SaloonService {
         return saloonClosureMapper.toResponse(saloonClosure);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<SaloonClosureResponse> getAllSaloonClosuresBySaloon(Pageable pageable,Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -227,6 +236,7 @@ public class SaloonService {
                 .build();
     }
 
+    @Transactional
     public void deleteSaloonClosure(Long libraryId,Long saloonId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -248,10 +258,13 @@ public class SaloonService {
     }
 
 
+    // --- Saloon Closure Methods ---
 
 
+    // --- Saloon Working Hours Methods ---
 
 
+    @Transactional
     public CreateSaloonWorkingHourResponse createLibraryWorkingHour(@Valid CreateSaloonWorkingHourRequest request, Long libraryId, Long saloonId) {
 
 
@@ -280,6 +293,7 @@ public class SaloonService {
 
     }
 
+    @Transactional
     public SaloonWorkingHoursResponse updateSaloonWorkingHours(Long libraryId, Long saloonId, Long workingHoursId,
                                                                @Valid UpdateSaloonWorkingHoursRequest request) {
 
@@ -311,6 +325,7 @@ public class SaloonService {
 
     }
 
+    @Transactional(readOnly = true)
     public SaloonWorkingHoursResponse getSaloonWorkingHoursById(Long libraryId, Long saloonId, Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -331,6 +346,7 @@ public class SaloonService {
         return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<SaloonWorkingHoursResponse> getAllWorkingHoursBySaloon(Pageable pageable, Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -359,6 +375,7 @@ public class SaloonService {
 
     }
 
+    @Transactional
     public void deleteSaloonWorkingHours(Long libraryId, Long saloonId, Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);

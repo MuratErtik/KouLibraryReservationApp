@@ -6,11 +6,9 @@ import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +16,6 @@ public class LibraryManager {
 
     private final LibraryRepository libraryRepository;
 
-    @Transactional
     public Library saveLibrary(Library library) {
 
         if (libraryRepository.existsByName(library.getName())) {
@@ -28,12 +25,10 @@ public class LibraryManager {
 
     }
 
-    @Transactional
     public void updateLibrary(Library library) {
         libraryRepository.save(library);
     }
 
-    @Transactional
     public void checkNameConflict(Library library, String requestName) {
         if (!library.getName().equals(requestName)) {
             if (libraryRepository.existsByName(requestName)) {
@@ -44,14 +39,12 @@ public class LibraryManager {
         }
     }
 
-    @Transactional(readOnly = true)
     public Page<Library> getAllLibraries(Pageable pageable) {
 
         return libraryRepository.findAll(pageable);
 
     }
 
-    @Transactional(readOnly = true)
     public Library getLibraryById(Long libraryId) {
 
         return libraryRepository.findById(libraryId)
@@ -59,7 +52,6 @@ public class LibraryManager {
 
     }
 
-    @Transactional(readOnly = true)
     public Page<Library> getLibraryByName(String name,Pageable pageable) {
 
         Page<Library> libraries = libraryRepository.findByNameContainingIgnoreCase(name,pageable);
@@ -71,7 +63,6 @@ public class LibraryManager {
         return libraries;
     }
 
-    @Transactional
     public void deleteLibraryById(Long libraryId) {
 
         libraryRepository.deleteById(libraryId);

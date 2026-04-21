@@ -19,6 +19,7 @@ import org.koulibrary.koulibraryreservationapp.mappers.DeskMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class DeskService {
     private final DeskManager deskManager;
 
 
+    @Transactional
     public CreateDeskResponse createDesk(@Valid CreateDeskRequest request, Long libraryId, Long saloonId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -58,6 +60,7 @@ public class DeskService {
     }
 
 
+    @Transactional
     public DeskResponse updateDesk(Long libraryId, Long saloonId, Long deskId, @Valid UpdateDeskRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -86,6 +89,7 @@ public class DeskService {
 
     }
 
+    @Transactional(readOnly = true)
     public DeskResponse getDeskById(Long libraryId, Long saloonId, Long deskId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -107,6 +111,7 @@ public class DeskService {
 
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<DeskResponse> getAllDesks(Pageable pageable, Long saloonId, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -134,7 +139,7 @@ public class DeskService {
     }
 
 
-
+    @Transactional
     public void deleteDesk(Long libraryId, Long saloonId, Long deskId) {
 
         Library library = libraryManager.getLibraryById(libraryId);

@@ -2,12 +2,9 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
-
-
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
 import org.koulibrary.koulibraryreservationapp.exceptions.ClosureDoesNotBelongToThisLibrary;
@@ -16,7 +13,6 @@ import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRang
 import org.koulibrary.koulibraryreservationapp.exceptions.WorkingHoursDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
-
 import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryClosuresMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryMapper;
@@ -24,6 +20,7 @@ import org.koulibrary.koulibraryreservationapp.mappers.LibraryWorkingHoursMapper
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -44,6 +41,7 @@ public class LibraryService {
 
     private final LibraryWorkingHoursManager libraryWorkingHoursManager;
 
+    @Transactional
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
         Library library = libraryMapper.toEntity(request);
@@ -57,6 +55,7 @@ public class LibraryService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryResponse> getAllLibraries(Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getAllLibraries(pageable);
@@ -77,6 +76,7 @@ public class LibraryService {
 
     }
 
+    @Transactional(readOnly = true)
     public LibraryResponse getLibraryById(Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -84,6 +84,7 @@ public class LibraryService {
         return libraryMapper.toResponse(library);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryResponse> getLibraryByName(String name, Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getLibraryByName(name, pageable);
@@ -98,6 +99,7 @@ public class LibraryService {
                 .build();
     }
 
+    @Transactional
     public LibraryResponse updateLibrary(Long id, @Valid UpdateLibraryRequest request) {
 
         Library library = libraryManager.getLibraryById(id);
@@ -112,6 +114,7 @@ public class LibraryService {
         return libraryMapper.toResponse(library);
     }
 
+    @Transactional
     public void deleteLibrary(Long id) {
 
         Library library = libraryManager.getLibraryById(id);
@@ -121,6 +124,7 @@ public class LibraryService {
 
     //Closure Methods....
 
+    @Transactional
     public CreateLibraryClosureResponse createLibraryClosure(@Valid CreateLibraryClosureRequest request, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -143,6 +147,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public LibraryClosureResponse updateLibraryClosure(Long libraryId, Long closureId, @Valid UpdateLibraryClosureRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -170,6 +175,7 @@ public class LibraryService {
     }
 
 
+    @Transactional(readOnly = true)
     public LibraryClosureResponse getLibraryClosureById(Long libraryId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -183,6 +189,7 @@ public class LibraryService {
         return libraryClosuresMapper.toResponse(libraryClosures);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryClosureResponse> getAllLibraryClosuresByLibrary(Pageable pageable,Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -208,6 +215,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public void deleteLibraryClosure(Long libraryId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -223,6 +231,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public CreateLibraryWorkingHourResponse createLibraryWorkingHour(@Valid CreateLibraryWorkingHourRequest request, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -243,6 +252,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public LibraryWorkingHoursResponse updateLibraryWorkingHours(Long libraryId, Long workingHoursId, @Valid UpdateLibraryWorkingHoursRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -265,6 +275,7 @@ public class LibraryService {
 
     }
 
+    @Transactional(readOnly = true)
     public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId,Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -279,6 +290,7 @@ public class LibraryService {
 
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHoursByLibrary(Pageable pageable, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -302,6 +314,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -316,6 +329,7 @@ public class LibraryService {
 
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryClosureResponse> getAllLibraryClosures(Pageable pageable) {
 
 
@@ -336,6 +350,7 @@ public class LibraryService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable) {
 
 
