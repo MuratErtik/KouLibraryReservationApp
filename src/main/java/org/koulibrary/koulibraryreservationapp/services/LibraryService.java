@@ -2,19 +2,17 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
-
-
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
+import org.koulibrary.koulibraryreservationapp.exceptions.ClosureDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
+import org.koulibrary.koulibraryreservationapp.exceptions.WorkingHoursDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryClosureManager;
 import org.koulibrary.koulibraryreservationapp.managers.LibraryManager;
-
 import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManager;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryClosuresMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryMapper;
@@ -22,6 +20,7 @@ import org.koulibrary.koulibraryreservationapp.mappers.LibraryWorkingHoursMapper
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -42,6 +41,7 @@ public class LibraryService {
 
     private final LibraryWorkingHoursManager libraryWorkingHoursManager;
 
+    @Transactional
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
 
         Library library = libraryMapper.toEntity(request);
@@ -55,6 +55,7 @@ public class LibraryService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryResponse> getAllLibraries(Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getAllLibraries(pageable);
@@ -75,6 +76,7 @@ public class LibraryService {
 
     }
 
+    @Transactional(readOnly = true)
     public LibraryResponse getLibraryById(Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -82,6 +84,7 @@ public class LibraryService {
         return libraryMapper.toResponse(library);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<LibraryResponse> getLibraryByName(String name, Pageable pageable) {
 
         Page<Library> libraries = libraryManager.getLibraryByName(name, pageable);
@@ -96,10 +99,13 @@ public class LibraryService {
                 .build();
     }
 
+    @Transactional
     public LibraryResponse updateLibrary(Long id, @Valid UpdateLibraryRequest request) {
 
         Library library = libraryManager.getLibraryById(id);
 
+        //you must check before the mapper because of that updated library object already flushed in DB
+        libraryManager.checkNameConflict(library, request.getName());
 
         Library libraryToUpdate = libraryMapper.updateLibraryFromDto(request,library);
 
@@ -108,6 +114,7 @@ public class LibraryService {
         return libraryMapper.toResponse(library);
     }
 
+    @Transactional
     public void deleteLibrary(Long id) {
 
         Library library = libraryManager.getLibraryById(id);
@@ -117,6 +124,7 @@ public class LibraryService {
 
     //Closure Methods....
 
+    @Transactional
     public CreateLibraryClosureResponse createLibraryClosure(@Valid CreateLibraryClosureRequest request, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -125,6 +133,8 @@ public class LibraryService {
         if (request.getEndDateTime().isBefore(request.getStartDateTime())) {
             throw new EndDateCannotBeBeforeStartDateException("Start date cannot be after end date");
         }
+
+
 
         LibraryClosures libraryClosures = libraryClosuresMapper.toEntity(request,library);
 
@@ -137,6 +147,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public LibraryClosureResponse updateLibraryClosure(Long libraryId, Long closureId, @Valid UpdateLibraryClosureRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -149,6 +160,12 @@ public class LibraryService {
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
 
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
+
+        libraryClosureManager.checkDateIntervalConflict(library,libraryClosures,request.getStartDateTime(),request.getEndDateTime());
+
         LibraryClosures libraryClosuresToUpdate = libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
 
         libraryClosureManager.updateLibraryClosure(libraryClosuresToUpdate);
@@ -158,21 +175,27 @@ public class LibraryService {
     }
 
 
+    @Transactional(readOnly = true)
     public LibraryClosureResponse getLibraryClosureById(Long libraryId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
 
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
+
         return libraryClosuresMapper.toResponse(libraryClosures);
     }
 
-    public PageResponse<LibraryClosureResponse> getAllLibraryClosures(Pageable pageable,Long libraryId) {
+    @Transactional(readOnly = true)
+    public PageResponse<LibraryClosureResponse> getAllLibraryClosuresByLibrary(Pageable pageable,Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
 
-        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosures(pageable,library);
+        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosuresByLibrary(pageable,library);
 
         List<LibraryClosureResponse> responses = libraryClosures.getContent().stream()
                 .map(libraryClosuresMapper::toResponse)
@@ -192,17 +215,23 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public void deleteLibraryClosure(Long libraryId, Long closureId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryClosures libraryClosures = libraryClosureManager.getLibraryClosureById(closureId);
 
+        if (!libraryClosures.getLibrary().getId().equals(libraryId)){
+            throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
+        }
+
         libraryClosureManager.deleteLibraryClosureId(closureId);
 
 
     }
 
+    @Transactional
     public CreateLibraryWorkingHourResponse createLibraryWorkingHour(@Valid CreateLibraryWorkingHourRequest request, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -223,6 +252,7 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public LibraryWorkingHoursResponse updateLibraryWorkingHours(Long libraryId, Long workingHoursId, @Valid UpdateLibraryWorkingHoursRequest request) {
 
         Library library = libraryManager.getLibraryById(libraryId);
@@ -233,6 +263,10 @@ public class LibraryService {
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
 
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
+
         LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
 
         libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
@@ -241,22 +275,28 @@ public class LibraryService {
 
     }
 
-    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId, Long workingHoursId) {
+    @Transactional(readOnly = true)
+    public LibraryWorkingHoursResponse getLibraryWorkingHoursById(Long libraryId,Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
 
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
+
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
     }
 
-    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable, Long libraryId) {
+    @Transactional(readOnly = true)
+    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHoursByLibrary(Pageable pageable, Long libraryId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
 
-        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingClosure(pageable,library);
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHoursByLibrary(pageable,library);
 
         List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
                 .map(libraryWorkingHoursMapper::toResponse)
@@ -274,13 +314,62 @@ public class LibraryService {
 
     }
 
+    @Transactional
     public void deleteLibraryWorkingHours(Long libraryId, Long workingHoursId) {
 
         Library library = libraryManager.getLibraryById(libraryId);
 
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursManager.getLibraryWorkingHoursById(workingHoursId);
 
+        if (!libraryWorkingHours.getLibrary().getId().equals(libraryId)){
+            throw new WorkingHoursDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the working hours");
+        }
+
         libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
+
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<LibraryClosureResponse> getAllLibraryClosures(Pageable pageable) {
+
+
+        Page<LibraryClosures> libraryClosures = libraryClosureManager.getAllLibraryClosures(pageable);
+
+        List<LibraryClosureResponse> responses = libraryClosures.getContent().stream()
+                .map(libraryClosuresMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryClosureResponse>builder()
+                .content(responses)
+                .pageNumber(libraryClosures.getNumber())
+                .pageSize(libraryClosures.getSize())
+                .totalElements(libraryClosures.getTotalElements())
+                .totalPages(libraryClosures.getTotalPages())
+                .isLast(libraryClosures.isLast())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<LibraryWorkingHoursResponse> getAllLibraryWorkingHours(Pageable pageable) {
+
+
+
+        Page<LibraryWorkingHours> libraryWorkingHours = libraryWorkingHoursManager.getAllLibraryWorkingHours(pageable);
+
+        List<LibraryWorkingHoursResponse> responses = libraryWorkingHours.getContent().stream()
+                .map(libraryWorkingHoursMapper::toResponse)
+                .toList();
+
+
+        return PageResponse.<LibraryWorkingHoursResponse>builder()
+                .content(responses)
+                .pageNumber(libraryWorkingHours.getNumber())
+                .pageSize(libraryWorkingHours.getSize())
+                .totalElements(libraryWorkingHours.getTotalElements())
+                .totalPages(libraryWorkingHours.getTotalPages())
+                .isLast(libraryWorkingHours.isLast())
+                .build();
 
     }
 }

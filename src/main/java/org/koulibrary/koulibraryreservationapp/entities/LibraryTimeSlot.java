@@ -11,7 +11,8 @@ import java.time.LocalTime;
         uniqueConstraints = @UniqueConstraint(columnNames = {"library_id", "day_of_week", "start_time"})
 )
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class LibraryTimeSlot {
 
@@ -45,12 +46,12 @@ public class LibraryTimeSlot {
 /**
  * Kütüphane için önceden tanımlanmış zaman bloklarını temsil eder.
  *
- * Neden bu tablo?
+ *
  *   - Rezervasyon sistemi serbest timestamp yerine bu slotlara bağlı çalışır.
  *   - Çakışma kontrolü basitleşir: aynı desk + aynı slot = max 1 rezervasyon.
  *   - UI tarafında "boş slot seç" akışı doğrudan bu tablodan beslenir.
  *
- * Nasıl üretilir?
+ *
  *   - Library kaydedildiğinde veya slotDurationMinutes güncellendiğinde,
  *     LibraryTimeSlotGeneratorService her gün için slotları otomatik üretir.
  *   - Örn: openingTime=09:00, closingTime=21:00, slotDuration=120 dk

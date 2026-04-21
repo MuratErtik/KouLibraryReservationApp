@@ -19,8 +19,8 @@ public class UpdateSaloonRequest {
     private Integer floor;
 
     //the capacity of the saloon should not update unless tables add or remove!!!
-//    @Min(value = 1, message = "Capacity must be at least 1")
-//    private Integer capacity;
+    @Min(value = 1, message = "Capacity must be at least 1")
+    private Integer capacity;
 
     @NotNull(message = "Invalid Status will not be accepted!")
     private SaloonStatus status;

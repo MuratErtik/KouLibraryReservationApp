@@ -1,18 +1,16 @@
 package org.koulibrary.koulibraryreservationapp.managers;
 
+
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.exceptions.IntervalDateException;
-import org.koulibrary.koulibraryreservationapp.exceptions.LibraryAlreadyExistsException;
 import org.koulibrary.koulibraryreservationapp.exceptions.LibraryNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.LibraryClosuresRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.DateTimeException;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +19,7 @@ public class LibraryClosureManager {
     private final LibraryClosuresRepository libraryClosuresRepository;
 
 
-    @Transactional
+
     public LibraryClosures saveLibraryClosures(LibraryClosures libraryClosures) {
 
         if(libraryClosuresRepository.existsByLibraryAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqual(
@@ -37,7 +35,7 @@ public class LibraryClosureManager {
 
     }
 
-    @Transactional(readOnly = true)
+
     public LibraryClosures getLibraryClosureById(Long libraryClosureId) {
 
         return libraryClosuresRepository.findById(libraryClosureId)
@@ -45,21 +43,43 @@ public class LibraryClosureManager {
 
     }
 
-    @Transactional
+
     public void updateLibraryClosure(LibraryClosures libraryClosuresToUpdate) {
         libraryClosuresRepository.save(libraryClosuresToUpdate);
     }
 
-    @Transactional(readOnly = true)
-    public Page<LibraryClosures> getAllLibraryClosures(Pageable pageable,Library library) {
+
+    public Page<LibraryClosures> getAllLibraryClosuresByLibrary(Pageable pageable,Library library) {
 
 
         return libraryClosuresRepository.findByLibrary(library,pageable);
     }
 
-    @Transactional
+
+    public Page<LibraryClosures> getAllLibraryClosures(Pageable pageable) {
+
+
+        return libraryClosuresRepository.findAll(pageable);
+    }
+
+
     public void deleteLibraryClosureId(Long closureId) {
 
         libraryClosuresRepository.deleteById(closureId);
+    }
+
+
+    public void checkDateIntervalConflict(Library library, LibraryClosures libraryClosures, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+
+        if (libraryClosuresRepository
+                .existsByLibraryAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqualAndIdNot(
+                        library,
+                        endDateTime,
+                        startDateTime,
+                        libraryClosures.getId()
+                )) {
+            throw new IntervalDateException("The library is already closed during this time interval.");
+        }
+
     }
 }

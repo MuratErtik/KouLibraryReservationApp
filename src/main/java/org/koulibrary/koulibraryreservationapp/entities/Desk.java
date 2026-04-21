@@ -36,7 +36,7 @@ public class Desk {
     private DeskPolicy policy;
 
     @Column(nullable = false)
-    private boolean hasPowerSocket;
+    private Boolean hasPowerSocket;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "saloon_id", nullable = false)

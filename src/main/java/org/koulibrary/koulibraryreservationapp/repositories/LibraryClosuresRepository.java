@@ -21,4 +21,5 @@ public interface LibraryClosuresRepository extends JpaRepository<LibraryClosures
 
     Page<LibraryClosures> findByLibrary(Library library, Pageable pageable);
 
+    Boolean existsByLibraryAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqualAndIdNot(Library library, LocalDateTime startDateTimeIsLessThan, LocalDateTime endDateTimeIsGreaterThan, Long id);
 }

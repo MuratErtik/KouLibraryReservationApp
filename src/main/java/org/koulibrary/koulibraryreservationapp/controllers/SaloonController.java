@@ -2,13 +2,8 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateSaloonRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateLibraryClosureRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateSaloonRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.CreateSaloonResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.LibraryClosureResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.SaloonResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.services.SaloonService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.SALOONCONTROLLER;
+import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.*;
 
 @RestController
 @RequestMapping(SALOONCONTROLLER)
@@ -37,7 +32,7 @@ public class SaloonController {
                 .body(response);
     }
 
-    @PatchMapping("/update-saloon/{saloonId}")
+    @PatchMapping("/{saloonId}")
     public ResponseEntity<SaloonResponse> updateSaloon(
             @PathVariable Long libraryId,
             @PathVariable Long saloonId,
@@ -51,13 +46,14 @@ public class SaloonController {
     }
 
 
-    @GetMapping("/get-saloon/{saloonId}")
+    @GetMapping("/{saloonId}")
     public ResponseEntity<SaloonResponse> getSaloonById(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
         return ResponseEntity.ok(saloonService.getSaloonById(libraryId,saloonId));
     }
 
-    @GetMapping("/get-all-saloons")
+    //by library
+    @GetMapping()
     public ResponseEntity<PageResponse<SaloonResponse>> getALlSaloons(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "library") Pageable pageable) {
@@ -66,11 +62,136 @@ public class SaloonController {
     }
 
 
-    @DeleteMapping("/delete-saloon/{saloonId}")
+    @DeleteMapping("/{saloonId}")
     public ResponseEntity<Void> deleteSaloon(@PathVariable Long libraryId, @PathVariable Long saloonId) {
 
 
         saloonService.deleteSaloon(libraryId,saloonId);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
+    //saloonclosure endpoint starting...
+
+
+    @PostMapping(SALOONCLOSURECONTROLLER)
+    public ResponseEntity<CreateSaloonClosureResponse> createSaloonClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @Valid @RequestBody CreateSaloonClosureRequest request) {
+
+        CreateSaloonClosureResponse response = saloonService.createSaloonClosure(request, saloonId,libraryId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PatchMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
+    public ResponseEntity<SaloonClosureResponse> updateSaloonClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId,
+            @Valid @RequestBody UpdateSaloonClosureRequest request) {
+
+        SaloonClosureResponse response = saloonService.updateSaloonClosure(libraryId,saloonId, closureId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
+    public ResponseEntity<SaloonClosureResponse> getSaloonClosureById(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId) {
+
+        return ResponseEntity.ok(saloonService.getSaloonClosureById(libraryId,saloonId, closureId));
+    }
+
+    @GetMapping(SALOONCLOSURECONTROLLER)
+    public ResponseEntity<PageResponse<SaloonClosureResponse>> getAllSaloonClosureBySaloon(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
+
+        return ResponseEntity.ok(saloonService.getAllSaloonClosuresBySaloon(pageable,libraryId ,saloonId));
+    }
+
+
+    @DeleteMapping(SALOONCLOSURECONTROLLER+"/{closureId}")
+    public ResponseEntity<Void> deleteSaloonClosure(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long closureId) {
+
+        saloonService.deleteSaloonClosure(libraryId,saloonId, closureId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    //saloonclosure endpoint ending...
+
+
+    // saloon working hours endpoints....
+
+
+    @PostMapping(SALOONWORKINGHOURSCONTROLLER)
+    public ResponseEntity<CreateSaloonWorkingHourResponse> createSaloonWorkingHour(@Valid @RequestBody CreateSaloonWorkingHourRequest request,
+                                                                                   @PathVariable Long libraryId,
+                                                                                   @PathVariable Long saloonId) {
+
+        CreateSaloonWorkingHourResponse response = saloonService.createLibraryWorkingHour(request,libraryId,saloonId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+
+    @PatchMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
+    public ResponseEntity<SaloonWorkingHoursResponse> updateSaloonWorkingHours(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PathVariable Long workingHoursId,
+            @Valid @RequestBody UpdateSaloonWorkingHoursRequest request) {
+
+        SaloonWorkingHoursResponse response = saloonService.updateSaloonWorkingHours(libraryId,saloonId,workingHoursId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
+    @GetMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
+    public ResponseEntity<SaloonWorkingHoursResponse> getSaloonWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
+                                                                                @PathVariable Long saloonId) {
+
+        return ResponseEntity.ok(saloonService.getSaloonWorkingHoursById(libraryId,saloonId,workingHoursId));
+    }
+
+
+
+    @GetMapping(SALOONWORKINGHOURSCONTROLLER)
+    public ResponseEntity<PageResponse<SaloonWorkingHoursResponse>> getAllSaloonWorkingHours(
+            @PathVariable Long libraryId,
+            @PathVariable Long saloonId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        return ResponseEntity.ok(saloonService.getAllWorkingHoursBySaloon(pageable,libraryId,saloonId));
+    }
+
+
+
+    @DeleteMapping(SALOONWORKINGHOURSCONTROLLER+"/{workingHoursId}")
+    public ResponseEntity<Void> deleteSaloonWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId,
+                                                         @PathVariable Long saloonId) {
+
+
+        saloonService.deleteSaloonWorkingHours(libraryId,saloonId,workingHoursId);
         return ResponseEntity.noContent().build();
 
 

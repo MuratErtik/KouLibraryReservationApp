@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.*;
 
@@ -53,7 +52,7 @@ public class LibraryController {
     //Listing
 
     // list just one library by some filter
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<PageResponse<LibraryResponse>> getLibraryByName(@RequestParam String name,
                                                                   @PageableDefault(size = 10, sort = "name") Pageable pageable) {
 
@@ -67,7 +66,7 @@ public class LibraryController {
     }
 
     
-    @GetMapping("get-all")
+    @GetMapping
     public ResponseEntity<PageResponse<LibraryResponse>> getAllLibraries(
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {
 
@@ -87,7 +86,7 @@ public class LibraryController {
     //library closure endpoints
 
     //CRUD
-    @PostMapping("/{libraryId}/create-closure")
+    @PostMapping(LIBRARYCLOSURECONTROLLER)
     public ResponseEntity<CreateLibraryClosureResponse> createLibraryClosure(@Valid @RequestBody CreateLibraryClosureRequest request, @PathVariable Long libraryId) {
 
         CreateLibraryClosureResponse response = libraryService.createLibraryClosure(request,libraryId);
@@ -97,7 +96,7 @@ public class LibraryController {
                 .body(response);
     }
 
-    @PatchMapping("/{libraryId}/update-closure/{closureId}")
+    @PatchMapping(LIBRARYCLOSURECONTROLLER+"/{closureId}")
     public ResponseEntity<LibraryClosureResponse> updateLibraryClosure(
             @PathVariable Long libraryId,
             @PathVariable Long closureId,
@@ -110,23 +109,30 @@ public class LibraryController {
                 .body(response);
     }
 
-    @GetMapping("/{libraryId}/get-closure/{closureId}")
+    @GetMapping(LIBRARYCLOSURECONTROLLER+"/{closureId}")
     public ResponseEntity<LibraryClosureResponse> getLibraryClosureById(@PathVariable Long libraryId, @PathVariable Long closureId) {
 
         return ResponseEntity.ok(libraryService.getLibraryClosureById(libraryId,closureId));
     }
 
-    @GetMapping("/{libraryId}/get-all-closure")
-    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(
+    @GetMapping(LIBRARYCLOSURECONTROLLER+"/by-library")
+    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosureByLibrary(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
 
-        return ResponseEntity.ok(libraryService.getAllLibraryClosures(pageable,libraryId));
+        return ResponseEntity.ok(libraryService.getAllLibraryClosuresByLibrary(pageable,libraryId));
+    }
+
+    //this method is unnecessary but should be useful for the future!
+    @GetMapping(LIBRARYCLOSURECONTROLLER)
+    public ResponseEntity<PageResponse<LibraryClosureResponse>> getAllLibraryClosure(@PageableDefault(size = 10, sort = "startDateTime") Pageable pageable) {
+
+        return ResponseEntity.ok(libraryService.getAllLibraryClosures(pageable));
     }
 
 
 
-    @DeleteMapping("/{libraryId}/delete-closure/{closureId}")
+    @DeleteMapping(LIBRARYCLOSURECONTROLLER+"/{closureId}")
     public ResponseEntity<Void> deleteLibraryClosure(@PathVariable Long libraryId, @PathVariable Long closureId) {
 
 
@@ -138,8 +144,9 @@ public class LibraryController {
 
 
     //library WorkingHours endpoints
-    @PostMapping("/{libraryId}/create-working-hours")
-    public ResponseEntity<CreateLibraryWorkingHourResponse> createLibraryWorkingHour(@Valid @RequestBody CreateLibraryWorkingHourRequest request, @PathVariable Long libraryId) {
+    @PostMapping(LIBRARYWORKINGHOURSCONTROLLER)
+    public ResponseEntity<CreateLibraryWorkingHourResponse> createLibraryWorkingHour(@Valid @RequestBody CreateLibraryWorkingHourRequest request,
+                                                                                     @PathVariable Long libraryId) {
 
         CreateLibraryWorkingHourResponse response = libraryService.createLibraryWorkingHour(request,libraryId);
 
@@ -149,7 +156,7 @@ public class LibraryController {
     }
 
 
-    @PatchMapping("/{libraryId}/update-working-hours/{workingHoursId}")
+    @PatchMapping(LIBRARYWORKINGHOURSCONTROLLER+"/{workingHoursId}")
     public ResponseEntity<LibraryWorkingHoursResponse> updateLibraryWorkingHours(
             @PathVariable Long libraryId,
             @PathVariable Long workingHoursId,
@@ -163,24 +170,31 @@ public class LibraryController {
     }
 
 
-    @GetMapping("/{libraryId}/get-working-hours/{workingHoursId}")
-    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
+    @GetMapping(LIBRARYWORKINGHOURSCONTROLLER+"/{workingHoursId}")
+    public ResponseEntity<LibraryWorkingHoursResponse> getLibraryWorkingHoursById(@PathVariable Long libraryId,@PathVariable Long workingHoursId) {
 
         return ResponseEntity.ok(libraryService.getLibraryWorkingHoursById(libraryId,workingHoursId));
     }
 
 
 
-    @GetMapping("/{libraryId}/get-all-working-hours")
-    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
+    @GetMapping(LIBRARYWORKINGHOURSCONTROLLER+"/by-library")
+    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHoursByLibrary(
             @PathVariable Long libraryId,
             @PageableDefault(size = 10, sort = "id") Pageable pageable) {
 
-        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable,libraryId));
+        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHoursByLibrary(pageable,libraryId));
+    }
+
+    //this method is unnecessary but should be useful for the future!
+    @GetMapping(LIBRARYWORKINGHOURSCONTROLLER)
+    public ResponseEntity<PageResponse<LibraryWorkingHoursResponse>> getAllLibraryWorkingHours(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(libraryService.getAllLibraryWorkingHours(pageable));
     }
 
 
-    @DeleteMapping("/{libraryId}/delete-working-hours/{workingHoursId}")
+    @DeleteMapping(LIBRARYWORKINGHOURSCONTROLLER+"/{workingHoursId}")
     public ResponseEntity<Void> deleteLibraryWorkingHours(@PathVariable Long libraryId, @PathVariable Long workingHoursId) {
 
 
