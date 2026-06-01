@@ -60,9 +60,10 @@ public class Library {
     @Builder.Default
     private List<LibraryClosures> closures = new ArrayList<>();
 
-    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<LibraryTimeSlot> timeSlots = new ArrayList<>();
+    //foreign key has been changed from lib to saloon!!
+//    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+//    private List<LibraryTimeSlot> timeSlots = new ArrayList<>();
 
     @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
