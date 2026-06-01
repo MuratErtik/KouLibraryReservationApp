@@ -36,6 +36,9 @@ public class Saloon {
 
     private Integer capacity;
 
+    @Column(nullable = true) //if its null inherits the value of the library
+    private Integer slotDurationMinutes;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "library_id", nullable = false)
@@ -53,4 +56,10 @@ public class Saloon {
 
     @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL)
     private Set<Desk> tables;
+
+
+    @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SaloonTimeSlot> timeSlots = new ArrayList<>();
+
 }
