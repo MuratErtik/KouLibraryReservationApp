@@ -11,8 +11,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "waitlist")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Waitlist {
 
@@ -30,7 +32,7 @@ public class Waitlist {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", nullable = false)
-    private LibraryTimeSlot slot;
+    private SaloonTimeSlot slot;
 
     @Column(nullable = false)
     @Builder.Default
