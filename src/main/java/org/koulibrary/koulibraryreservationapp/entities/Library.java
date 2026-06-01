@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,11 @@ public class Library {
 
     @Column(nullable = false)
     private String address;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private LibraryStatus status = LibraryStatus.OPEN;
 
     @Column(nullable = false)
     private Integer maxActiveReservationsPerUser;
