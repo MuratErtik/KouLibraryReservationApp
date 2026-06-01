@@ -22,6 +22,8 @@ public class RestApisConf {
 
     public static final String DESKCONTROLLER = SALOONCONTROLLER+"/{saloonId}"+"/desks";
 
+    public static final String LIBRARYTIMESLOTCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/timeslots}";
+
 
 
 
