@@ -26,10 +26,17 @@ spring:
 
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
+          #time_zone: UTC
           batch_size: 5
         order_updates: true
         order_inserts: true
 
     defer-datasource-initialization: false
+
+  task:
+    scheduling:
+      pool:
+        size: 2
+
 
   #jpa conf end
