@@ -1,10 +1,12 @@
 package org.koulibrary.koulibraryreservationapp.repositories;
 
+import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LibraryRepository extends JpaRepository<Library, Long> {
@@ -14,4 +16,8 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
     Page<Library> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Optional<Library> findById(Long id);
+
+    List<Library> findAllByStatus(LibraryStatus status);
+
+
 }
