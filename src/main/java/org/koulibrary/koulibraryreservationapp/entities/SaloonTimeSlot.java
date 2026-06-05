@@ -36,10 +36,10 @@ public class SaloonTimeSlot {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
+    @Column(name = "start_time", columnDefinition = "TIME",nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
+    @Column(name = "end_time", columnDefinition = "TIME",nullable = false)
     private LocalTime endTime;
 
     //If this field is equal to false, then it is close to making a new appointment

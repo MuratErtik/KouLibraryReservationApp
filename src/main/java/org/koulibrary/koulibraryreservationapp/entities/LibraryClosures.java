@@ -29,10 +29,10 @@ public class LibraryClosures {
     @JoinColumn(name = "library_id", nullable = false)
     private Library library;
 
-    @Column(nullable = false)
+    @Column(name = "start_date_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime startDateTime;
 
-    @Column(nullable = false)
+    @Column(name = "end_date_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime endDateTime;
 
     @Column(nullable = false)
