@@ -2,11 +2,13 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.Library;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryClosures;
 import org.koulibrary.koulibraryreservationapp.entities.LibraryWorkingHours;
+import org.koulibrary.koulibraryreservationapp.entities.Saloon;
 import org.koulibrary.koulibraryreservationapp.exceptions.ClosureDoesNotBelongToThisLibrary;
 import org.koulibrary.koulibraryreservationapp.exceptions.EndDateCannotBeBeforeStartDateException;
 import org.koulibrary.koulibraryreservationapp.exceptions.InvalidWorkingHourRangeException;
@@ -17,13 +19,16 @@ import org.koulibrary.koulibraryreservationapp.managers.LibraryWorkingHoursManag
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryClosuresMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryMapper;
 import org.koulibrary.koulibraryreservationapp.mappers.LibraryWorkingHoursMapper;
+import org.koulibrary.koulibraryreservationapp.repositories.SaloonRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +45,10 @@ public class LibraryService {
     private final LibraryWorkingHoursMapper libraryWorkingHoursMapper;
 
     private final LibraryWorkingHoursManager libraryWorkingHoursManager;
+
+    private final SaloonRepository saloonRepository;
+
+    private final SlotGeneratorService slotGeneratorService;
 
     @Transactional
     public CreateLibraryResponse createLibrary(@Valid CreateLibraryRequest request) {
@@ -103,15 +112,19 @@ public class LibraryService {
     public LibraryResponse updateLibrary(Long id, @Valid UpdateLibraryRequest request) {
 
         Library library = libraryManager.getLibraryById(id);
-
-        //you must check before the mapper because of that updated library object already flushed in DB
         libraryManager.checkNameConflict(library, request.getName());
 
-        Library libraryToUpdate = libraryMapper.updateLibraryFromDto(request,library);
+        LibraryStatus oldStatus = library.getStatus();
 
+        Library libraryToUpdate = libraryMapper.updateLibraryFromDto(request, library);
         libraryManager.updateLibrary(libraryToUpdate);
 
-        return libraryMapper.toResponse(library);
+        if (libraryToUpdate.getStatus() != oldStatus) {
+            recomputeForLibrary(libraryToUpdate,
+                    LocalDate.now(), LocalDate.now().plusDays(SlotGeneratorService.WINDOW_DAYS));
+        }
+
+        return libraryMapper.toResponse(libraryToUpdate);
     }
 
     @Transactional
@@ -123,6 +136,12 @@ public class LibraryService {
     }
 
     //Closure Methods....
+
+    private void recomputeForLibrary(Library library, LocalDate from, LocalDate to) {
+        for (Saloon saloon : saloonRepository.findByLibrary(library)) {
+            slotGeneratorService.recomputeAvailability(saloon, library, from, to);
+        }
+    }
 
     @Transactional
     public CreateLibraryClosureResponse createLibraryClosure(@Valid CreateLibraryClosureRequest request, Long libraryId) {
@@ -139,6 +158,8 @@ public class LibraryService {
         LibraryClosures libraryClosures = libraryClosuresMapper.toEntity(request,library);
 
         LibraryClosures savedLibraryClosures = libraryClosureManager.saveLibraryClosures(libraryClosures);
+
+        recomputeForLibrary(library, savedLibraryClosures.getStartDateTime().toLocalDate(), savedLibraryClosures.getEndDateTime().toLocalDate());
 
         return CreateLibraryClosureResponse.builder()
                 .id(savedLibraryClosures.getId())
@@ -164,11 +185,27 @@ public class LibraryService {
             throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
         }
 
+        LocalDate oldFrom = libraryClosures.getStartDateTime().toLocalDate();
+        LocalDate oldTo   = libraryClosures.getEndDateTime().toLocalDate();
+
         libraryClosureManager.checkDateIntervalConflict(library,libraryClosures,request.getStartDateTime(),request.getEndDateTime());
 
         LibraryClosures libraryClosuresToUpdate = libraryClosuresMapper.updateLibraryClosureFromDto(request,libraryClosures);
 
         libraryClosureManager.updateLibraryClosure(libraryClosuresToUpdate);
+
+        LocalDate newFrom = libraryClosuresToUpdate.getStartDateTime().toLocalDate();
+        LocalDate newTo   = libraryClosuresToUpdate.getEndDateTime().toLocalDate();
+
+        LocalDate from = Stream.of(oldFrom, newFrom)
+                .min(LocalDate::compareTo)
+                .orElse(oldFrom);
+
+        LocalDate to   = Stream.of(oldTo, newTo)
+                .max(LocalDate::compareTo)
+                .orElse(oldTo);
+
+        recomputeForLibrary(library, from, to);
 
         return libraryClosuresMapper.toResponse(libraryClosures);
 
@@ -226,8 +263,12 @@ public class LibraryService {
             throw new ClosureDoesNotBelongToThisLibrary("Library with id " + libraryId + " doesn't belong to the closure");
         }
 
+        LocalDate from = libraryClosures.getStartDateTime().toLocalDate();
+        LocalDate to   = libraryClosures.getEndDateTime().toLocalDate();
+
         libraryClosureManager.deleteLibraryClosureId(closureId);
 
+        recomputeForLibrary(library, from, to);
 
     }
 

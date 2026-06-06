@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.*;
@@ -18,7 +19,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Collections.min;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +43,8 @@ public class SaloonService {
     private final SaloonClosureMapper saloonClosureMapper;
 
     private final SaloonClosureManager saloonClosureManager;
+
+    private final SlotGeneratorService slotGeneratorService;
 
     @Transactional
     public CreateSaloonResponse createSaloon(@Valid CreateSaloonRequest request, Long libraryId) {
@@ -65,15 +73,18 @@ public class SaloonService {
 
         String nameToCheck = request.getName() != null ? request.getName() : saloon.getName();
         Integer floorToCheck = request.getFloor() != null ? request.getFloor() : saloon.getFloor();
-
-        boolean duplicate = saloonManager.findDuplicate(libraryId,floorToCheck,nameToCheck,saloonId);
-
-        if (duplicate) {
+        if (saloonManager.findDuplicate(libraryId, floorToCheck, nameToCheck, saloonId)) {
             throw new SaloonAlreadyExistException("A saloon with the same name already exists on floor " + floorToCheck);
         }
 
+        SaloonStatus oldStatus = saloon.getStatus();
+
         Saloon saloonToUpdate = saloonMapper.updateSaloonFromDto(request, saloon);
         saloonManager.updateSaloon(saloonToUpdate);
+
+        if (saloonToUpdate.getStatus() != oldStatus) {
+            slotGeneratorService.recomputeAvailability(saloonToUpdate, library);
+        }
 
         return saloonMapper.toResponse(saloonToUpdate);
     }
@@ -150,6 +161,10 @@ public class SaloonService {
 
         SaloonClosure savedSaloonClosure = saloonClosureManager.saveSaloonClosure(saloonClosure);
 
+        slotGeneratorService.recomputeAvailability(saloon, library,
+                savedSaloonClosure.getStartDateTime().toLocalDate(), savedSaloonClosure.getEndDateTime().toLocalDate());
+
+
         return CreateSaloonClosureResponse.builder()
                 .id(savedSaloonClosure.getId())
                 .message("Saloon closure created successfully for Saloon: " + saloon.getName()+" Library: " + library.getName())
@@ -180,11 +195,28 @@ public class SaloonService {
             throw new ClosureDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the closure");
         }
 
+        LocalDate oldFrom = saloonClosure.getStartDateTime().toLocalDate();
+        LocalDate oldTo   = saloonClosure.getEndDateTime().toLocalDate();
+
+
         saloonClosureManager.checkDateIntervalConflict(saloon, saloonClosure, request.getStartDateTime(), request.getEndDateTime());
 
         SaloonClosure saloonClosureToUpdate = saloonClosureMapper.updateSaloonClosureFromDto(request, saloonClosure);
 
         saloonClosureManager.updateSaloonClosure(saloonClosureToUpdate);
+
+        LocalDate newFrom = saloonClosureToUpdate.getStartDateTime().toLocalDate();
+        LocalDate newTo   = saloonClosureToUpdate.getEndDateTime().toLocalDate();
+
+        LocalDate from = Stream.of(oldFrom, newFrom)
+                .min(LocalDate::compareTo)
+                .orElse(oldFrom);
+
+        LocalDate to   = Stream.of(oldTo, newTo)
+                .max(LocalDate::compareTo)
+                .orElse(oldTo);
+
+        slotGeneratorService.recomputeAvailability(saloon, library, from, to);
 
         return saloonClosureMapper.toResponse(saloonClosureToUpdate);
     }
@@ -254,7 +286,12 @@ public class SaloonService {
             throw new ClosureDoesNotBelongToThisSaloon("Saloon with id " + saloonId + " doesn't belong to the closure");
         }
 
+        LocalDate from = saloonClosure.getStartDateTime().toLocalDate();
+        LocalDate to   = saloonClosure.getEndDateTime().toLocalDate();
+
         saloonClosureManager.deleteSaloonClosureId(closureId);
+
+        slotGeneratorService.recomputeAvailability(saloon, library, from, to);
     }
 
 
