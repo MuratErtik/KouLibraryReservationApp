@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 
 public interface SaloonTimeSlotRepository extends JpaRepository<SaloonTimeSlot, Long> {
@@ -22,4 +23,10 @@ public interface SaloonTimeSlotRepository extends JpaRepository<SaloonTimeSlot, 
     @Query("SELECT s.startTime FROM SaloonTimeSlot s WHERE s.saloon = :saloon AND s.date = :date")
     Set<LocalTime> findStartTimesBySaloonAndDate(@Param("saloon") Saloon saloon,
                                                  @Param("date") LocalDate date);
+
+
+
+    @Query("SELECT s FROM SaloonTimeSlot s WHERE s.saloon.id = :saloonId AND s.date = :date")
+    List<SaloonTimeSlot> findBySaloonIdAndDate(@Param("saloonId") Long saloonId,
+                                               @Param("date") LocalDate date);
 }
