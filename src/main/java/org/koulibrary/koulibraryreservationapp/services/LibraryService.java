@@ -272,6 +272,11 @@ public class LibraryService {
 
     }
 
+    private void recomputeForLibrary(Library library) {
+        recomputeForLibrary(library,
+                LocalDate.now(), LocalDate.now().plusDays(SlotGeneratorService.WINDOW_DAYS));
+    }
+
     @Transactional
     public CreateLibraryWorkingHourResponse createLibraryWorkingHour(@Valid CreateLibraryWorkingHourRequest request, Long libraryId) {
 
@@ -285,6 +290,9 @@ public class LibraryService {
         LibraryWorkingHours libraryWorkingHours = libraryWorkingHoursMapper.toEntity(request,library);
 
         LibraryWorkingHours savedLibraryWorkingHour = libraryWorkingHoursManager.saveLibraryWorkingHours(libraryWorkingHours);
+
+        recomputeForLibrary(library);
+
 
         return CreateLibraryWorkingHourResponse.builder()
                 .id(savedLibraryWorkingHour.getId())
@@ -311,6 +319,8 @@ public class LibraryService {
         LibraryWorkingHours libraryWorkingHoursToUpdate = libraryWorkingHoursMapper.updateLibraryWorkingHoursFromDto(request,libraryWorkingHours);
 
         libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
+
+        recomputeForLibrary(library);
 
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
@@ -367,6 +377,8 @@ public class LibraryService {
         }
 
         libraryWorkingHoursManager.deleteLibraryWorkingHoursById(workingHoursId);
+
+        recomputeForLibrary(library);
 
     }
 

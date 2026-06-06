@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Collections.min;
+
 
 
 @Service
@@ -322,6 +322,9 @@ public class SaloonService {
 
         SaloonWorkingHours savedsaloonWorkingHours = saloonWorkingHoursManager.saveSaloonWorkingHours(saloonWorkingHours);
 
+        slotGeneratorService.recomputeAvailability(saloon, library);
+
+
         return CreateSaloonWorkingHourResponse.builder()
                 .id(savedsaloonWorkingHours.getId())
                 .message("Saloon working hours created successfully for " + saloon.getName()+" and library " + library.getName())
@@ -357,6 +360,9 @@ public class SaloonService {
         SaloonWorkingHours saloonWorkingHoursToUpdate = saloonWorkingHoursMapper.updateSaloonWorkingHoursFromDto(request,saloonWorkingHours);
 
         saloonWorkingHoursManager.updateSaloonWorkingHours(saloonWorkingHoursToUpdate);
+
+        slotGeneratorService.recomputeAvailability(saloon, library);
+
 
         return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
 
@@ -430,6 +436,9 @@ public class SaloonService {
         }
 
         saloonWorkingHoursManager.deleteSaloonWorkingHoursById(workingHoursId);
+
+        slotGeneratorService.recomputeAvailability(saloon, library);
+
     }
 
 }
