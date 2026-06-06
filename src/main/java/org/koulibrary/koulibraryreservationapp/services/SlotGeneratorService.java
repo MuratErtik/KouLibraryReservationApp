@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
+import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
 import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
@@ -31,6 +32,10 @@ public class SlotGeneratorService {
     private final LibraryClosuresRepository libraryClosuresRepository;
     private final SaloonWorkingHoursRepository saloonWorkingHoursRepository;
     private final SaloonClosuresRepository saloonClosuresRepository;
+    private final ReservationRepository reservationRepository;
+
+    public static final int WINDOW_DAYS = 7;
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -42,35 +47,21 @@ public class SlotGeneratorService {
 
         Optional<LibraryWorkingHours> libraryWorkingHours =
                 libraryWorkingHoursRepository.findByLibraryAndDayOfWeek(library, dayOfWeek);
-
         if (libraryWorkingHours.isEmpty()) {
             log.debug("{} is closed on {}, no slots generated", library.getName(), date);
-            return;
+            return; // o gün hiç çalışmıyor -> slot olmamalı (closure değil)
         }
 
         List<LibraryClosures> libraryClosures =
                 libraryClosuresRepository.findByLibraryIdAndDate(library.getId(), date);
 
-        boolean isLibraryFullyClosed = libraryClosures.stream().anyMatch(sc ->
-                !sc.getStartDateTime().toLocalTime().isAfter(libraryWorkingHours.get().getOpeningTime()) &&
-                        !sc.getEndDateTime().toLocalTime().isBefore(libraryWorkingHours.get().getClosingTime())
-        );
-
-        if (isLibraryFullyClosed) {
-            log.debug("{} is closed all day on {}", library.getName(), date);
-            return;
-        }
-
-        LocalTime opening;
-        LocalTime closing;
-
+        LocalTime opening, closing;
         Optional<SaloonWorkingHours> saloonWorkingHours =
                 saloonWorkingHoursRepository.findBySaloonAndDayOfWeek(saloon, dayOfWeek);
-
         if (saloonWorkingHours.isPresent()) {
             if (saloonWorkingHours.get().getIsClosed()) {
                 log.debug("Saloon {} is closed on {}", saloon.getId(), dayOfWeek);
-                return;
+                return; // saloon o gün hiç çalışmıyor
             }
             opening = saloonWorkingHours.get().getOpeningTime();
             closing = saloonWorkingHours.get().getClosingTime();
@@ -81,16 +72,6 @@ public class SlotGeneratorService {
 
         List<SaloonClosure> saloonClosures =
                 saloonClosuresRepository.findBySaloonIdAndDate(saloon.getId(), date);
-
-        boolean isSaloonFullyClosed = saloonClosures.stream().anyMatch(sc ->
-                !sc.getStartDateTime().toLocalTime().isAfter(opening) &&
-                        !sc.getEndDateTime().toLocalTime().isBefore(closing)
-        );
-
-        if (isSaloonFullyClosed) {
-            log.debug("{} is closed all day on {}", saloon.getName(), date);
-            return;
-        }
 
         int duration = saloon.getSlotDurationMinutes() != null
                 ? saloon.getSlotDurationMinutes()
@@ -107,54 +88,93 @@ public class SlotGeneratorService {
                                List<LibraryClosures> libraryClosures,
                                List<SaloonClosure> saloonClosures) {
 
-        Set<LocalTime> existingStartTimes =
-                saloonTimeSlotRepository.findStartTimesBySaloonAndDate(saloon, date);
+        Set<LocalTime> existingStartTimes = saloonTimeSlotRepository.findStartTimesBySaloonAndDate(saloon, date);
         Set<LocalTime> plannedStartTimes = new HashSet<>();
-
         List<SaloonTimeSlot> slotsToSave = new ArrayList<>();
         LocalTime cursor = opening;
 
         while (true) {
             LocalTime slotEnd = cursor.plusMinutes(duration);
-
-            // 1) Past midnight (slotEnd wrapped around)  stop
-            // 2) Exceeded closing time stop
-            if (!slotEnd.isAfter(cursor) || slotEnd.isAfter(closing)) {
-                break;
-            }
+            if (!slotEnd.isAfter(cursor) || slotEnd.isAfter(closing)) break;
 
             LocalTime slotStart = cursor;
             cursor = slotEnd;
 
-            if (isConflicting(date, slotStart, slotEnd, libraryClosures,
-                    LibraryClosures::getStartDateTime, LibraryClosures::getEndDateTime)) {
-                continue;
-            }
-            if (isConflicting(date, slotStart, slotEnd, saloonClosures,
-                    SaloonClosure::getStartDateTime, SaloonClosure::getEndDateTime)) {
-                continue;
-            }
-
-            // Skip if it already exists in DB or was generated in this round
             if (existingStartTimes.contains(slotStart) || !plannedStartTimes.add(slotStart)) {
                 continue;
             }
 
+            boolean closed =
+                    isConflicting(date, slotStart, slotEnd, libraryClosures,
+                            LibraryClosures::getStartDateTime, LibraryClosures::getEndDateTime) ||
+                            isConflicting(date, slotStart, slotEnd, saloonClosures,
+                                    SaloonClosure::getStartDateTime, SaloonClosure::getEndDateTime);
+
             slotsToSave.add(SaloonTimeSlot.builder()
                     .saloon(saloon).date(date)
                     .startTime(slotStart).endTime(slotEnd)
-                    .isAvailable(true).build());
+                    .isAvailable(!closed)
+                    .build());
 
             if (slotsToSave.size() >= 50) {
                 saloonTimeSlotRepository.saveAll(slotsToSave);
-                entityManager.flush();
-                entityManager.clear();
-                slotsToSave.clear();
+                entityManager.flush(); entityManager.clear(); slotsToSave.clear();
             }
         }
+        if (!slotsToSave.isEmpty()) saloonTimeSlotRepository.saveAll(slotsToSave);
+    }
 
-        if (!slotsToSave.isEmpty()) {
-            saloonTimeSlotRepository.saveAll(slotsToSave);
+    private static final Set<ReservationStatus> LIVE_STATUSES =
+            EnumSet.of(ReservationStatus.PENDING, ReservationStatus.ACTIVE, ReservationStatus.SUSPENDED);
+
+    @Transactional
+    public void recomputeAvailability(Saloon saloon, Library library, LocalDate from, LocalDate to) {
+
+        boolean operating = library.getStatus() == LibraryStatus.OPEN
+                && saloon.getStatus()  == SaloonStatus.OPEN;
+
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            List<SaloonTimeSlot> slots = saloonTimeSlotRepository.findBySaloonIdAndDate(saloon.getId(), date);
+            if (slots.isEmpty()) continue;
+
+            List<LibraryClosures> libC = libraryClosuresRepository.findByLibraryIdAndDate(library.getId(), date);
+            List<SaloonClosure>  salC = saloonClosuresRepository.findBySaloonIdAndDate(saloon.getId(), date);
+
+            for (SaloonTimeSlot slot : slots) {
+                boolean closed =
+                        isConflicting(date, slot.getStartTime(), slot.getEndTime(), libC,
+                                LibraryClosures::getStartDateTime, LibraryClosures::getEndDateTime) ||
+                                isConflicting(date, slot.getStartTime(), slot.getEndTime(), salC,
+                                        SaloonClosure::getStartDateTime, SaloonClosure::getEndDateTime);
+
+                boolean available = operating && !closed;
+                slot.setIsAvailable(available);
+                if (!available) cancelLiveReservations(slot);
+            }
+        }
+    }
+
+    @Transactional
+    public void recomputeAvailability(Saloon saloon, Library library) {
+        LocalDate today = LocalDate.now();
+        recomputeAvailability(saloon, library, today, today.plusDays(WINDOW_DAYS));
+    }
+
+    private void cancelLiveReservations(SaloonTimeSlot slot) {
+        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
+        for (Reservation r : live) {
+            r.setStatus(ReservationStatus.CANCELLED);
+            r.setCancellationReason("Slot kapatildi");
+            // notification service
+        }
+    }
+
+    private void cancelLiveReservations(SaloonTimeSlot slot, String reason) {
+        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
+        for (Reservation r : live) {
+            r.setStatus(ReservationStatus.CANCELLED);
+            r.setCancellationReason(reason);
+            // notification service
         }
     }
 
