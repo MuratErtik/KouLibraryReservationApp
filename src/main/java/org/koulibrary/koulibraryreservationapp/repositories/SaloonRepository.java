@@ -14,6 +14,8 @@ public interface SaloonRepository extends JpaRepository<Saloon, Long> {
     Boolean existsByLibraryAndFloorAndName(Library library, Integer floor, String name);
 
     Page<Saloon> findByLibrary(Library library, Pageable pageable);
+
+    List<Saloon> findByLibrary(Library library);
     
     boolean existsByLibraryIdAndFloorAndNameAndIdNot(Long libraryId, Integer floorToCheck, String nameToCheck, Long saloonId);
 
