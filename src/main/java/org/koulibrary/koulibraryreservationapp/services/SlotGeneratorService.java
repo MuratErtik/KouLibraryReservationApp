@@ -131,27 +131,50 @@ public class SlotGeneratorService {
     public void recomputeAvailability(Saloon saloon, Library library, LocalDate from, LocalDate to) {
 
         boolean operating = library.getStatus() == LibraryStatus.OPEN
-                && saloon.getStatus()  == SaloonStatus.OPEN;
+                && saloon.getStatus() == SaloonStatus.OPEN;
 
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
             List<SaloonTimeSlot> slots = saloonTimeSlotRepository.findBySaloonIdAndDate(saloon.getId(), date);
             if (slots.isEmpty()) continue;
 
+            DayHours hours = resolveHours(saloon, library, date);
             List<LibraryClosures> libC = libraryClosuresRepository.findByLibraryIdAndDate(library.getId(), date);
             List<SaloonClosure>  salC = saloonClosuresRepository.findBySaloonIdAndDate(saloon.getId(), date);
 
             for (SaloonTimeSlot slot : slots) {
+                boolean withinHours = hours.open()
+                        && !slot.getStartTime().isBefore(hours.opening())
+                        && !slot.getEndTime().isAfter(hours.closing());
+
                 boolean closed =
                         isConflicting(date, slot.getStartTime(), slot.getEndTime(), libC,
                                 LibraryClosures::getStartDateTime, LibraryClosures::getEndDateTime) ||
                                 isConflicting(date, slot.getStartTime(), slot.getEndTime(), salC,
                                         SaloonClosure::getStartDateTime, SaloonClosure::getEndDateTime);
 
-                boolean available = operating && !closed;
+                boolean available = operating && withinHours && !closed;
                 slot.setIsAvailable(available);
                 if (!available) cancelLiveReservations(slot);
             }
         }
+    }
+
+    private record DayHours(boolean open, LocalTime opening, LocalTime closing) {}
+
+    private DayHours resolveHours(Saloon saloon, Library library, LocalDate date) {
+        DayOfWeek dow = date.getDayOfWeek();
+
+        Optional<LibraryWorkingHours> lwh =
+                libraryWorkingHoursRepository.findByLibraryAndDayOfWeek(library, dow);
+        if (lwh.isEmpty()) return new DayHours(false, null, null);
+
+        Optional<SaloonWorkingHours> swh =
+                saloonWorkingHoursRepository.findBySaloonAndDayOfWeek(saloon, dow);
+        if (swh.isPresent()) {
+            if (Boolean.TRUE.equals(swh.get().getIsClosed())) return new DayHours(false, null, null);
+            return new DayHours(true, swh.get().getOpeningTime(), swh.get().getClosingTime());
+        }
+        return new DayHours(true, lwh.get().getOpeningTime(), lwh.get().getClosingTime());
     }
 
     @Transactional
@@ -169,14 +192,14 @@ public class SlotGeneratorService {
         }
     }
 
-    private void cancelLiveReservations(SaloonTimeSlot slot, String reason) {
-        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
-        for (Reservation r : live) {
-            r.setStatus(ReservationStatus.CANCELLED);
-            r.setCancellationReason(reason);
-            // notification service
-        }
-    }
+//    private void cancelLiveReservations(SaloonTimeSlot slot, String reason) {
+//        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
+//        for (Reservation r : live) {
+//            r.setStatus(ReservationStatus.CANCELLED);
+//            r.setCancellationReason(reason);
+//            // notification service
+//        }
+//    }
 
     private <T> boolean isConflicting(LocalDate date, LocalTime slotStart, LocalTime slotEnd,
                                       List<T> closures,
