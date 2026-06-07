@@ -20,4 +20,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.slot.id IN :slotIds AND r.status IN :statuses GROUP BY r.slot.id")
     List<Object[]> countReservedBySlotIds(@Param("slotIds") Collection<Long> slotIds,
                                           @Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("SELECT r.desk.id FROM Reservation r WHERE r.slot.id = :slotId AND r.status IN :statuses")
+    Set<Long> findReservedDeskIds(@Param("slotId") Long slotId,
+                                  @Param("statuses") Collection<ReservationStatus> statuses);
+
 }

@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jspecify.annotations.Nullable;
-import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
-import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
-import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
-import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
+import org.koulibrary.koulibraryreservationapp.domains.*;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.DeskAvailabilityResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.SlotResponse;
 import org.koulibrary.koulibraryreservationapp.entities.*;
+import org.koulibrary.koulibraryreservationapp.exceptions.SlotDoesNotBelongToSaloonException;
+import org.koulibrary.koulibraryreservationapp.exceptions.SlotNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,5 +100,45 @@ public class LibraryTimeSlotService {
                     slot.getStartTime(), slot.getEndTime(),
                     available, free);
         }).toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<DeskAvailabilityResponse> getAvailableDesks(Long saloonId, Long slotId) {
+
+
+
+        SaloonTimeSlot slot = saloonTimeSlotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found with id " + slotId));
+
+        if (!slot.getSaloon().getId().equals(saloonId)) {
+            throw new SlotDoesNotBelongToSaloonException(
+                    "Slot " + slotId + " does not belong to saloon " + saloonId);
+        }
+
+        List<Desk> desks = deskRepository.findBySaloonId(saloonId);
+
+        if (Boolean.FALSE.equals(slot.getIsAvailable())) {
+            return desks.stream()
+                    .map(d -> toDto(d, DeskAvailability.CLOSED))
+                    .toList();
+        }
+
+        Set<Long> reservedDeskIds =
+                reservationRepository.findReservedDeskIds(slotId, ReservationStatus.OCCUPYING);
+
+        return desks.stream().map(d -> {
+            DeskAvailability av;
+            if (d.getStatus() == DeskStatus.OUT_OF_SERVICE)   av = DeskAvailability.OUT_OF_SERVICE;
+            else if (reservedDeskIds.contains(d.getId()))      av = DeskAvailability.RESERVED;
+            else                                               av = DeskAvailability.AVAILABLE;
+            return toDto(d, av);
+        }).toList();
+    }
+
+
+    private DeskAvailabilityResponse toDto(Desk d, DeskAvailability av) {
+        return new DeskAvailabilityResponse(
+                d.getId(), d.getDeskNumber(), d.getHasPowerSocket(), d.getPolicy(), av);
     }
 }

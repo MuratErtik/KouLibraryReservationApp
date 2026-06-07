@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Set;
 
 public interface DeskRepository extends JpaRepository<Desk, Long> , JpaSpecificationExecutor<Desk> {
@@ -23,6 +24,8 @@ public interface DeskRepository extends JpaRepository<Desk, Long> , JpaSpecifica
     Long countBySaloonIdAndStatus(Long saloonId, DeskStatus status);
 
     Long countBySaloonIdAndStatusNot(Long saloonId, DeskStatus deskStatus);
+
+    List<Desk> findBySaloonId(Long saloonId);
 }
 
 
