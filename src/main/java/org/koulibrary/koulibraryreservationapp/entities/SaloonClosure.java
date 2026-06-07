@@ -29,10 +29,10 @@ public class SaloonClosure {
     @JoinColumn(name = "saloon_id", nullable = false)
     private Saloon saloon;
 
-    @Column(name = "start_date_time", nullable = false)
+    @Column(name = "start_date_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime startDateTime;
 
-    @Column(name = "end_date_time", nullable = false)
+    @Column(name = "end_date_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime endDateTime;
 
     @Column(nullable = false)

@@ -7,10 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.DayOfWeek;
+import java.util.Optional;
 
 public interface LibraryWorkingHoursRepository  extends JpaRepository<LibraryWorkingHours, Long> {
 
     Boolean existsByDayOfWeekAndLibrary(DayOfWeek dayOfWeek, Library library);
 
     Page<LibraryWorkingHours> findByLibrary(Library library, Pageable pageable);
+
+    Optional<LibraryWorkingHours> findByLibraryAndDayOfWeek(Library library, DayOfWeek dayOfWeek);
 }

@@ -1,38 +1,45 @@
 package org.koulibrary.koulibraryreservationapp.entities;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.DayOfWeek;
+
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 
 @Entity
 @Table(
-        name = "library_time_slots",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"library_id", "day_of_week", "start_time"})
+        name = "saloon_time_slots",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"saloon_id", "date", "start_time"})
 )
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LibraryTimeSlot {
+public class SaloonTimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "library_id", nullable = false)
-    private Library library;
+    @JoinColumn(name = "saloon_id", nullable = false)
+    private Saloon saloon;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "day_of_week", nullable = false)
-    private DayOfWeek dayOfWeek;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "day_of_week", nullable = false)
+//    private DayOfWeek dayOfWeek;
 
+
+    //instead of day of week
     @Column(nullable = false)
+    private LocalDate date;
+
+    @Column(name = "start_time", columnDefinition = "TIME",nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
+    @Column(name = "end_time", columnDefinition = "TIME",nullable = false)
     private LocalTime endTime;
 
     //If this field is equal to false, then it is close to making a new appointment

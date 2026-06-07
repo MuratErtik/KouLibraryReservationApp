@@ -43,7 +43,7 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", nullable = false)
-    private LibraryTimeSlot slot;
+    private SaloonTimeSlot slot;
 
 
     // it is equal to ReservationDate+HourOfSlot

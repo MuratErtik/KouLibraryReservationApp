@@ -3,7 +3,7 @@ package org.koulibrary.koulibraryreservationapp.domains;
 public enum DeskStatus {
 
     AVAILABLE,
-    OCCUPIED,
-    RESERVED,
+    //OCCUPIED,
+    //RESERVED,
     OUT_OF_SERVICE
 }

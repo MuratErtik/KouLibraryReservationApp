@@ -296,6 +296,32 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(SlotNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleSlotNotFoundException(SlotNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(SlotDoesNotBelongToSaloonException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleSlotDoesNotBelongToSaloonException(SlotDoesNotBelongToSaloonException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
+
     @ExceptionHandler(DeskDoesNotBelongToSaloonException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody

@@ -36,10 +36,10 @@ public class LibraryWorkingHours {
     @Column(nullable = false)
     private DayOfWeek dayOfWeek;
 
-    @Column(nullable = false)
+    @Column(name = "opening_time", columnDefinition = "TIME", nullable = false)
     private LocalTime openingTime;
 
-    @Column(nullable = false)
+    @Column(name = "closing_time", columnDefinition = "TIME", nullable = false)
     private LocalTime closingTime;
 
     private Boolean isClosed;

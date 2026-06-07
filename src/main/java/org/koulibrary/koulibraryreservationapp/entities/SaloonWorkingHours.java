@@ -32,10 +32,10 @@ public class SaloonWorkingHours {
     @Column(name = "day_of_week", nullable = false)
     private DayOfWeek dayOfWeek;
 
-    @Column(nullable = false)
+    @Column(name = "opening_time", columnDefinition = "TIME", nullable = false)
     private LocalTime openingTime;
 
-    @Column(nullable = false)
+    @Column(name = "closing_time", columnDefinition = "TIME", nullable = false)
     private LocalTime closingTime;
 
     @Column(nullable = false)

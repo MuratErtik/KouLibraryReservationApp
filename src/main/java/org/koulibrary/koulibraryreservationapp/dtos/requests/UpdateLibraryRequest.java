@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
 
 @Data
 @Builder
@@ -18,6 +19,8 @@ public class UpdateLibraryRequest {
     private String description;
 
     private String address;
+
+    private LibraryStatus status;
 
     @Min(value = 1, message = "User must have at least 1 active reservation capacity")
     private Integer maxActiveReservationsPerUser;

@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,11 @@ public class Library {
 
     @Column(nullable = false)
     private String address;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private LibraryStatus status = LibraryStatus.OPEN;
 
     @Column(nullable = false)
     private Integer maxActiveReservationsPerUser;
@@ -60,9 +66,10 @@ public class Library {
     @Builder.Default
     private List<LibraryClosures> closures = new ArrayList<>();
 
-    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<LibraryTimeSlot> timeSlots = new ArrayList<>();
+    //foreign key has been changed from lib to saloon!!
+//    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+//    private List<LibraryTimeSlot> timeSlots = new ArrayList<>();
 
     @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
