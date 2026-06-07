@@ -214,4 +214,18 @@ public class SlotGeneratorService {
                         slotEndDT.isAfter(getStart.apply(closure))
         );
     }
+
+    public void generateForSaloon(Saloon saloon, Library library, LocalDate from, LocalDate to) {
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            generateSlotsForDate(saloon, library, date);
+        }
+    }
+
+    @Transactional
+    public void syncSaloon(Saloon saloon, Library library) {
+        LocalDate from = LocalDate.now();
+        LocalDate to   = from.plusDays(WINDOW_DAYS);
+        generateForSaloon(saloon, library, from, to);     //(idempotent)
+        recomputeAvailability(saloon, library, from, to);  // update just exist slots
+    }
 }

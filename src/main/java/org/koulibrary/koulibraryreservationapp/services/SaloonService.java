@@ -55,6 +55,8 @@ public class SaloonService {
 
         Saloon savedSaloon = saloonManager.saveSaloon(saloon);
 
+        slotGeneratorService.syncSaloon(savedSaloon,library);
+
         return CreateSaloonResponse.builder()
                 .id(savedSaloon.getId())
                 .message("Saloon created successfully for " + library.getName())
@@ -322,7 +324,7 @@ public class SaloonService {
 
         SaloonWorkingHours savedsaloonWorkingHours = saloonWorkingHoursManager.saveSaloonWorkingHours(saloonWorkingHours);
 
-        slotGeneratorService.recomputeAvailability(saloon, library);
+        slotGeneratorService.syncSaloon(saloon, library);
 
 
         return CreateSaloonWorkingHourResponse.builder()
@@ -361,7 +363,7 @@ public class SaloonService {
 
         saloonWorkingHoursManager.updateSaloonWorkingHours(saloonWorkingHoursToUpdate);
 
-        slotGeneratorService.recomputeAvailability(saloon, library);
+        slotGeneratorService.syncSaloon(saloon, library);
 
 
         return saloonWorkingHoursMapper.toResponse(saloonWorkingHours);
@@ -437,7 +439,7 @@ public class SaloonService {
 
         saloonWorkingHoursManager.deleteSaloonWorkingHoursById(workingHoursId);
 
-        slotGeneratorService.recomputeAvailability(saloon, library);
+        slotGeneratorService.syncSaloon(saloon, library);
 
     }
 

@@ -143,6 +143,12 @@ public class LibraryService {
         }
     }
 
+    private void syncForLibrary(Library library) {
+        for (Saloon saloon : saloonRepository.findByLibrary(library)) {
+            slotGeneratorService.syncSaloon(saloon, library);
+        }
+    }
+
     @Transactional
     public CreateLibraryClosureResponse createLibraryClosure(@Valid CreateLibraryClosureRequest request, Long libraryId) {
 
@@ -291,7 +297,9 @@ public class LibraryService {
 
         LibraryWorkingHours savedLibraryWorkingHour = libraryWorkingHoursManager.saveLibraryWorkingHours(libraryWorkingHours);
 
-        recomputeForLibrary(library);
+
+
+        syncForLibrary(library);
 
 
         return CreateLibraryWorkingHourResponse.builder()
@@ -320,7 +328,7 @@ public class LibraryService {
 
         libraryWorkingHoursManager.updateLibraryWorkingHours(libraryWorkingHoursToUpdate);
 
-        recomputeForLibrary(library);
+        syncForLibrary(library);
 
         return libraryWorkingHoursMapper.toResponse(libraryWorkingHours);
 
