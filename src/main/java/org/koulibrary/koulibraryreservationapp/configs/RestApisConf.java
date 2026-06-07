@@ -22,7 +22,7 @@ public class RestApisConf {
 
     public static final String DESKCONTROLLER = SALOONCONTROLLER+"/{saloonId}"+"/desks";
 
-    public static final String LIBRARYTIMESLOTCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/timeslots}";
+    public static final String LIBRARYTIMESLOTCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/saloons/{saloonId}/timeslots";
 
 
 
