@@ -3,8 +3,12 @@ package org.koulibrary.koulibraryreservationapp.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.jspecify.annotations.Nullable;
+import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
+import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.SlotResponse;
 import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
 import org.springframework.stereotype.Service;
@@ -14,10 +18,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -27,14 +28,15 @@ public class LibraryTimeSlotService {
 
     private final int DAYS_AHEAD = 7;
 
-
-
     private final SlotGeneratorService slotGeneratorService;
 
-
-
-
     private final SaloonRepository saloonRepository;
+
+    private final ReservationRepository reservationRepository;
+
+    private final DeskRepository deskRepository;
+
+    private final SaloonTimeSlotRepository saloonTimeSlotRepository;
 
 
 
@@ -71,7 +73,32 @@ public class LibraryTimeSlotService {
     }
 
 
+    @Transactional(readOnly = true)
+    public List<SlotResponse> getSlots(Long saloonId, LocalDate date) {
 
+        List<SaloonTimeSlot> slots = saloonTimeSlotRepository.findBySaloonIdAndDate(saloonId, date);
+        if (slots.isEmpty()) return List.of();
 
+        slots = slots.stream()
+                .sorted(Comparator.comparing(SaloonTimeSlot::getStartTime))
+                .toList();
 
+        long bookableDeskCount = deskRepository.countBySaloonIdAndStatusNot(saloonId, DeskStatus.OUT_OF_SERVICE);
+
+        List<Long> slotIds = slots.stream().map(SaloonTimeSlot::getId).toList();
+        Map<Long, Long> reservedBySlot = new HashMap<>();
+        for (Object[] row : reservationRepository.countReservedBySlotIds(slotIds, ReservationStatus.OCCUPYING)) {
+            reservedBySlot.put((Long) row[0], (Long) row[1]);
+        }
+
+        return slots.stream().map(slot -> {
+            boolean available = Boolean.TRUE.equals(slot.getIsAvailable());
+            long reserved = reservedBySlot.getOrDefault(slot.getId(), 0L);
+            long free = available ? Math.max(0, bookableDeskCount - reserved) : 0;
+            return new SlotResponse(
+                    slot.getId(), slot.getDate(),
+                    slot.getStartTime(), slot.getEndTime(),
+                    available, free);
+        }).toList();
+    }
 }
