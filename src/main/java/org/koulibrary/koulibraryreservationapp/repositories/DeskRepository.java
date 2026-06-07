@@ -1,6 +1,7 @@
 package org.koulibrary.koulibraryreservationapp.repositories;
 
 
+import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.entities.Desk;
 import org.koulibrary.koulibraryreservationapp.entities.Saloon;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,10 @@ public interface DeskRepository extends JpaRepository<Desk, Long> , JpaSpecifica
     Page<Desk> findBySaloon(Saloon saloon, Pageable pageable);
 
     Set<Desk> findBySaloon(Saloon saloon);
+
+    Long countBySaloonIdAndStatus(Long saloonId, DeskStatus status);
+
+    Long countBySaloonIdAndStatusNot(Long saloonId, DeskStatus deskStatus);
 }
 
 
