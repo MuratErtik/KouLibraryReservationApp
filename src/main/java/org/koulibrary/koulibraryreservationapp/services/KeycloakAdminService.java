@@ -24,18 +24,16 @@ public class KeycloakAdminService {
 
     @Value("${keycloak.realm}") private String realm;
 
-    public String createUser(String username, String email,
-                             String firstName, String lastName, String password) {
+    public String createUser(String username, String email, String firstName,
+                             String lastName, String password, String realmRole) {
 
         UserRepresentation user = new UserRepresentation();
-        //studentIdNumber
         user.setUsername(username);
         user.setEmail(email);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEnabled(true);
         user.setEmailVerified(true);
-        // email-verify disabled
 
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setType(CredentialRepresentation.PASSWORD);
@@ -52,10 +50,13 @@ public class KeycloakAdminService {
                 throw new KeycloakOperationException("Keycloak user creation failed: " + response.getStatus());
             }
             String keycloakId = CreatedResponseUtil.getCreatedId(response);
-
-            RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
-            users.get(keycloakId).roles().realmLevel().add(List.of(userRole));
-
+            try {
+                RoleRepresentation role = keycloak.realm(realm).roles().get(realmRole).toRepresentation();
+                users.get(keycloakId).roles().realmLevel().add(List.of(role));
+            } catch (RuntimeException ex) {
+                try { users.get(keycloakId).remove(); } catch (RuntimeException ignored) {}
+                throw ex;
+            }
             return keycloakId;
         }
     }
