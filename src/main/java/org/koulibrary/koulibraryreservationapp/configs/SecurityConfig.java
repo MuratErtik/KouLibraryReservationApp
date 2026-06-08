@@ -34,21 +34,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)   // stateless REST + bearer token
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTHCONTROLLER+"/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,    DESKCONTROLLER + "/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,   DESKCONTROLLER).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,  DESKCONTROLLER + "/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, DESKCONTROLLER + "/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,    DESKCONTROLLER + "/**").authenticated()
+
+                        .requestMatchers(AUTHCONTROLLER + "/**").permitAll()
+
+                        .requestMatchers(USERCONTROLLER + "/me").authenticated()
+                        .requestMatchers(USERCONTROLLER + "/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, DESKCONTROLLER + "/admin/**").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.POST,   LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,  LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.GET,    LIBRARYCONTROLLER + "/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, LIBRARYTIMESLOTCONTROLLER + "/**").authenticated()
-                        // when all endpoints done then implement here
+
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
