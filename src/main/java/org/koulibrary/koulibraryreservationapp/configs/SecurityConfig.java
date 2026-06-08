@@ -21,6 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 import java.util.Map;
 
+import static org.koulibrary.koulibraryreservationapp.configs.RestApisConf.*;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -34,7 +36,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)   // stateless REST + bearer token
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(AUTHCONTROLLER+"/**").permitAll()
                         // when all endpoints done then implement here
                         .anyRequest().permitAll()
                 )
