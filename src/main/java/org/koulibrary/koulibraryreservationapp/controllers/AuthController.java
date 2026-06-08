@@ -34,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest req) {
-        return ResponseEntity.ok(keycloakAuthService.login(req.getStudentIdNumber(), req.getPassword()));
+        return ResponseEntity.ok(keycloakAuthService.login(req.getUsername(), req.getPassword()));
     }
 
     @PostMapping("/refresh")

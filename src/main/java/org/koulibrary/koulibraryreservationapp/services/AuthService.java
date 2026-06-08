@@ -29,12 +29,8 @@ public class AuthService {
         }
 
         String keycloakId = keycloakAdminService.createUser(
-                req.getStudentIdNumber(),
-                req.getEmail(),
-                req.getFirstName(),
-                req.getLastName(),
-                req.getPassword()
-        );
+                req.getStudentIdNumber(), req.getEmail(), req.getFirstName(),
+                req.getLastName(), req.getPassword(), "USER");
 
         try {
             User user = User.builder()
