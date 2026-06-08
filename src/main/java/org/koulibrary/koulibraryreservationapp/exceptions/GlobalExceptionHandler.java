@@ -341,6 +341,16 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ErrorDetail handleInvalidCredentialsException(InvalidCredentialsException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 
 
     @ExceptionHandler(DeskDoesNotBelongToSaloonException.class)
