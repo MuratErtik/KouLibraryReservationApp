@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -61,5 +62,12 @@ public class KeycloakAdminService {
 
     public void deleteUser(String keycloakId) {
         keycloak.realm(realm).users().get(keycloakId).remove();
+    }
+
+    public void setEnabled(String keycloakId, boolean enabled) {
+        UserResource userResource = keycloak.realm(realm).users().get(keycloakId);
+        UserRepresentation rep = userResource.toRepresentation();
+        rep.setEnabled(enabled);
+        userResource.update(rep);
     }
 }
