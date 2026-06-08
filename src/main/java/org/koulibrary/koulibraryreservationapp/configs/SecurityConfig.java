@@ -2,6 +2,7 @@ package org.koulibrary.koulibraryreservationapp.configs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,6 +38,11 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AUTHCONTROLLER+"/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,    DESKCONTROLLER + "/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   DESKCONTROLLER).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,  DESKCONTROLLER + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, DESKCONTROLLER + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,    DESKCONTROLLER + "/**").authenticated()
                         // when all endpoints done then implement here
                         .anyRequest().permitAll()
                 )
