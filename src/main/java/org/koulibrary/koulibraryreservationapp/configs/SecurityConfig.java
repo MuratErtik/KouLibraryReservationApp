@@ -43,6 +43,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH,  DESKCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, DESKCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,    DESKCONTROLLER + "/**").authenticated()
+                        .requestMatchers(HttpMethod.POST,   LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,  LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,    LIBRARYCONTROLLER + "/**").authenticated()
                         // when all endpoints done then implement here
                         .anyRequest().permitAll()
                 )
