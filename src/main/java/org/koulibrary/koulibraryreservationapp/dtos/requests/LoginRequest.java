@@ -17,8 +17,7 @@ import lombok.NoArgsConstructor;
 public class LoginRequest {
 
     @NotBlank(message = "Student ID number cannot be blank")
-    @Pattern(regexp = "^\\d{9}$", message = "Student ID must be exactly 9 digits")
-    private String studentIdNumber;
+    private String username;
 
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters")
