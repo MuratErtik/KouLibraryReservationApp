@@ -353,6 +353,18 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
     @ExceptionHandler(DeskDoesNotBelongToSaloonException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
