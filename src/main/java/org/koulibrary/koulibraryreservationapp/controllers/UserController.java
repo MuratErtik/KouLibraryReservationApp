@@ -2,12 +2,14 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateAdminRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateUserStatusRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.UserResponse;
 import org.koulibrary.koulibraryreservationapp.services.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -51,5 +53,11 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.softDelete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admins")
+    public ResponseEntity<String> createAdmin(@Valid @RequestBody CreateAdminRequest request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createAdmin(request));
     }
 }

@@ -1,8 +1,10 @@
 package org.koulibrary.koulibraryreservationapp.services;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.domains.UserStatus;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateAdminRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.UserResponse;
 import org.koulibrary.koulibraryreservationapp.entities.User;
@@ -80,5 +82,15 @@ public class UserService {
     private User findOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
+    }
+
+
+
+    public String createAdmin(CreateAdminRequest req) {
+        keycloakAdminService.createUser(
+                req.getUsername(), req.getEmail(), req.getFirstName(),
+                req.getLastName(), req.getPassword(), "ADMIN");
+
+        return "Admin created successfully with email: " + req.getEmail();
     }
 }
