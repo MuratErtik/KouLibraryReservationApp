@@ -318,6 +318,27 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorDetail handleUserAlreadyExistsException(UserAlreadyExistsException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(KeycloakOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ResponseBody
+    public ErrorDetail handleKeycloakOperationException(KeycloakOperationException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 
 
 
