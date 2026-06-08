@@ -26,6 +26,8 @@ public class RestApisConf {
 
     public static final String AUTHCONTROLLER = DEVELOPER+VERSIONS+"/auth";
 
+    public static final String USERCONTROLLER = DEVELOPER+VERSIONS+"/users";
+
 
 
 
