@@ -47,8 +47,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH,  LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, LIBRARYCONTROLLER + "/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,    LIBRARYCONTROLLER + "/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, LIBRARYTIMESLOTCONTROLLER + "/**").authenticated()
                         // when all endpoints done then implement here
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter()))
