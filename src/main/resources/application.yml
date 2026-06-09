@@ -38,5 +38,16 @@ spring:
       pool:
         size: 2
 
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/kou-library
   #jpa conf end
+
+
+keycloak:
+  auth-server-url: http://localhost:8081
+  realm: kou-library
+  client-id: library-backend
+  client-secret: ${KEYCLOAK_SECRET}

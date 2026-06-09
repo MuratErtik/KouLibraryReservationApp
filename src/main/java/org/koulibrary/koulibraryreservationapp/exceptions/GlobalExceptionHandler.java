@@ -318,8 +318,51 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorDetail handleUserAlreadyExistsException(UserAlreadyExistsException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(KeycloakOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ResponseBody
+    public ErrorDetail handleKeycloakOperationException(KeycloakOperationException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ErrorDetail handleInvalidCredentialsException(InvalidCredentialsException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 
 
     @ExceptionHandler(DeskDoesNotBelongToSaloonException.class)

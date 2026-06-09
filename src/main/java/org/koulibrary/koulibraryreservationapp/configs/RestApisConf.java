@@ -24,6 +24,10 @@ public class RestApisConf {
 
     public static final String LIBRARYTIMESLOTCONTROLLER = LIBRARYCONTROLLER+"/{libraryId}/saloons/{saloonId}/timeslots";
 
+    public static final String AUTHCONTROLLER = DEVELOPER+VERSIONS+"/auth";
+
+    public static final String USERCONTROLLER = DEVELOPER+VERSIONS+"/users";
+
 
 
 

@@ -32,11 +32,16 @@ public class User {
     private UserStatus userStatus;
 
     @Column(nullable = false, unique = true)
-    private String studentIdNumber;
+    private String keycloakId;
+
+    @Column(nullable = false, unique = true)
+    private String studentIdNumber;   // Keycloak username
+
+    @Column(unique = true)
+    private String email;
 
     private String firstName;
 
     private String lastName;
 
-    private String email;
 }
