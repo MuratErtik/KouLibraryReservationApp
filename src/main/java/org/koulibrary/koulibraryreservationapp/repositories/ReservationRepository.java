@@ -2,6 +2,8 @@ package org.koulibrary.koulibraryreservationapp.repositories;
 
 import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.entities.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +44,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                @Param("slotId") Long slotId,
                                                @Param("statuses") Collection<ReservationStatus> statuses);
 
+
+    @Query(value = "SELECT r FROM Reservation r " +
+            "JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s " +
+            "JOIN FETCH s.saloon sa " +
+            "JOIN FETCH sa.library " +
+            "WHERE r.user.id = :userId",
+            countQuery = "SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId")
+    Page<Reservation> findByUserIdWithDetails(@Param("userId") Long userId, Pageable pageable);
 }

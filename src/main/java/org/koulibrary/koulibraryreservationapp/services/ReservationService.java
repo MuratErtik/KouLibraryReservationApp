@@ -1,21 +1,27 @@
 package org.koulibrary.koulibraryreservationapp.services;
 
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.domains.PenaltyStatus;
 import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.domains.UserStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.ReservationResponse;
 import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.exceptions.*;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -128,4 +134,47 @@ public class ReservationService {
                 .reservationTime(r.getReservationTime())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MyReservationResponse> getMyReservations(String keycloakSub, Pageable pageable) {
+
+        // Fetch user WITHOUT LOCK (Read-only operation)
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        Page<Reservation> page = reservationRepository.findByUserIdWithDetails(user.getId(), pageable);
+
+        List<MyReservationResponse> content = page.getContent().stream()
+                .map(this::toMyResponse)
+                .toList();
+
+        return PageResponse.<MyReservationResponse>builder()
+                .content(content)
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .isLast(page.isLast())
+                .build();
+    }
+
+    private MyReservationResponse toMyResponse(Reservation reservation) {
+        Saloon saloon = reservation.getSlot().getSaloon();
+
+        return MyReservationResponse.builder()
+                .id(reservation.getId())
+                .deskId(reservation.getDesk().getId())
+                .deskNumber(reservation.getDesk().getDeskNumber())
+                .saloonName(saloon.getName())
+                .libraryName(saloon.getLibrary().getName())
+                .startTime(reservation.getStartTime())
+                .endTime(reservation.getEndTime())
+                .status(reservation.getStatus())
+                .reservationTime(reservation.getReservationTime())
+                .checkInTime(reservation.getCheckInTime())
+                .build();
+    }
+
+
+
 }

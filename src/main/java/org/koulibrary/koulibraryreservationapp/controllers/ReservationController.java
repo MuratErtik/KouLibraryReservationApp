@@ -4,16 +4,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.configs.RestApisConf;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.ReservationResponse;
 import org.koulibrary.koulibraryreservationapp.services.ReservationService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(RestApisConf.RESERVATIONCONTROLLER)
@@ -29,5 +31,13 @@ public class ReservationController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationService.create(jwt.getSubject(), request));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<PageResponse<MyReservationResponse>> getMyReservations(
+            @AuthenticationPrincipal Jwt jwt,
+            @PageableDefault(size = 10, sort = "reservationTime", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return ResponseEntity.ok(reservationService.getMyReservations(jwt.getSubject(), pageable));
     }
 }
