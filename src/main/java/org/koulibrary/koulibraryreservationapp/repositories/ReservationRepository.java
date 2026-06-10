@@ -25,4 +25,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Set<Long> findReservedDeskIds(@Param("slotId") Long slotId,
                                   @Param("statuses") Collection<ReservationStatus> statuses);
 
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
+            "WHERE r.desk.id = :deskId AND r.slot.id = :slotId AND r.status IN :statuses")
+    Boolean existsByDeskIdAndSlotIdAndStatusIn(@Param("deskId") Long deskId,
+                                               @Param("slotId") Long slotId,
+                                               @Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId AND r.status IN :statuses")
+    Long countByUserIdAndStatusIn(@Param("userId") Long userId,
+                                  @Param("statuses") Collection<ReservationStatus> statuses);
+
+
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
+            "WHERE r.user.id = :userId AND r.slot.id = :slotId AND r.status IN :statuses")
+    Boolean existsByUserIdAndSlotIdAndStatusIn(@Param("userId") Long userId,
+                                               @Param("slotId") Long slotId,
+                                               @Param("statuses") Collection<ReservationStatus> statuses);
+
 }
