@@ -3,6 +3,7 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.configs.RestApisConf;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
@@ -39,5 +40,14 @@ public class ReservationController {
             @PageableDefault(size = 10, sort = "reservationTime", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(reservationService.getMyReservations(jwt.getSubject(), pageable));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<MyReservationResponse> cancel(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long id,
+            @RequestBody(required = false) CancelReservationRequest request) {
+
+        return ResponseEntity.ok(reservationService.cancel(jwt.getSubject(), id, request));
     }
 }

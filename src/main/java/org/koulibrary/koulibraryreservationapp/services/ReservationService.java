@@ -6,6 +6,7 @@ import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
 import org.koulibrary.koulibraryreservationapp.domains.PenaltyStatus;
 import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.domains.UserStatus;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
@@ -175,6 +176,40 @@ public class ReservationService {
                 .build();
     }
 
+
+    @Transactional
+    public MyReservationResponse cancel(String keycloakSub, Long reservationId, CancelReservationRequest req) {
+
+        // 1) Fetch user by Keycloak ID
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        // 2) Fetch reservation with details
+        Reservation reservation = reservationRepository.findByIdWithDetails(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+
+        // 3) Ownership check: A user can only cancel their own reservation
+        if (!reservation.getUser().getId().equals(user.getId())) {
+            throw new ReservationDoesNotBelongToUserException("This reservation does not belong to you");
+        }
+
+        // 4) State check: Only non-terminal (cancellable) statuses can be cancelled
+        // Note: Assumes PENDING or OCCUPYING are cancellable.
+        if (reservation.getStatus() == ReservationStatus.CANCELLED ||
+                reservation.getStatus() == ReservationStatus.COMPLETED) {
+            throw new ReservationNotCancellableException(
+                    "This reservation cannot be cancelled. Current status: " + reservation.getStatus());
+        }
+
+        // 5) Update status and cancellation reason
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        if (req.getReason() != null && !req.getReason().isBlank()) {
+            reservation.setCancellationReason(req.getReason());
+        }
+
+        // Managed entity will automatically flush on commit. @Version handles optimistic locking.
+        return toMyResponse(reservation);
+    }
 
 
 }

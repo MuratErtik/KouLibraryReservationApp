@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -53,4 +54,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.user.id = :userId",
             countQuery = "SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId")
     Page<Reservation> findByUserIdWithDetails(@Param("userId") Long userId, Pageable pageable);
+
+    // ReservationRepository
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.id = :id")
+    Optional<Reservation> findByIdWithDetails(@Param("id") Long id);
 }
