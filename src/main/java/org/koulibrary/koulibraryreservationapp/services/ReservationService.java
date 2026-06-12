@@ -32,6 +32,7 @@ public class ReservationService {
     private final DeskRepository deskRepository;
     private final PenaltyRepository penaltyRepository;
     private final UserRepository userRepository;
+    private final ReservationStatusLogRepository reservationStatusLogRepository;
 
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
@@ -115,6 +116,8 @@ public class ReservationService {
         try {
             // flush is required here to force database constraint check before transaction commit phase
             reservation = reservationRepository.saveAndFlush(reservation);
+
+            logStatusChange(reservation, null, ReservationStatus.PENDING, user, null, "Reservation created");
         } catch (DataIntegrityViolationException e) {
             throw new DeskAlreadyReservedException("This desk was just reserved by another user");
         }
@@ -200,11 +203,14 @@ public class ReservationService {
                     "This reservation cannot be cancelled. Current status: " + reservation.getStatus());
         }
 
-        // 5) Update status and cancellation reason
-        reservation.setStatus(ReservationStatus.CANCELLED);
-        if (req.getReason() != null && !req.getReason().isBlank()) {
-            reservation.setCancellationReason(req.getReason());
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new ReservationNotCancellableException(
+                    "Only pending reservations can be cancelled. Current status: " + reservation.getStatus());
         }
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        if (req.getReason() != null && !req.getReason().isBlank()) reservation.setCancellationReason(req.getReason());
+        logStatusChange(reservation, ReservationStatus.PENDING, ReservationStatus.CANCELLED,
+                user, StatusChangeReason.USER_CANCELLED, req.getReason());
 
         // Managed entity will automatically flush on commit. @Version handles optimistic locking.
         return toMyResponse(reservation);
@@ -252,9 +258,18 @@ public class ReservationService {
         // 6) Activate reservation status and set check-in time
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservation.setCheckInTime(now);
+        logStatusChange(reservation, ReservationStatus.PENDING, ReservationStatus.ACTIVE, user, null, "checked in");
 
         // Managed entity will automatically flush on transaction commit. @Version handles concurrency control.
         return toMyResponse(reservation);
+    }
+
+    private void logStatusChange(Reservation r, ReservationStatus from, ReservationStatus to,
+                                 User changedBy, StatusChangeReason reason, String note) {
+        reservationStatusLogRepository.save(ReservationStatusLog.builder()
+                .reservation(r).changedBy(changedBy)
+                .fromStatus(from).toStatus(to)
+                .reason(reason).note(note).build());
     }
 
 
