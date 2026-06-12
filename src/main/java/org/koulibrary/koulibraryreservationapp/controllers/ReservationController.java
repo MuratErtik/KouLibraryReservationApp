@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.configs.RestApisConf;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
@@ -49,5 +50,13 @@ public class ReservationController {
             @RequestBody(required = false) CancelReservationRequest request) {
 
         return ResponseEntity.ok(reservationService.cancel(jwt.getSubject(), id, request));
+    }
+
+    @PostMapping("/check-in")
+    public ResponseEntity<MyReservationResponse> checkIn(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CheckInRequest request) {
+
+        return ResponseEntity.ok(reservationService.checkIn(jwt.getSubject(), request));
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -61,4 +62,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
             "WHERE r.id = :id")
     Optional<Reservation> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "JOIN FETCH r.desk " +
+            "WHERE r.user.id = :userId AND r.desk.id = :deskId " +
+            "AND r.status = :status AND r.endTime >= :now " +
+            "ORDER BY r.startTime ASC")
+    List<Reservation> findPendingForCheckIn(@Param("userId") Long userId,
+                                            @Param("deskId") Long deskId,
+                                            @Param("status") ReservationStatus status,
+                                            @Param("now") LocalDateTime now);
 }

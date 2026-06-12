@@ -1,12 +1,11 @@
 package org.koulibrary.koulibraryreservationapp.services;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
-import org.koulibrary.koulibraryreservationapp.domains.DeskStatus;
-import org.koulibrary.koulibraryreservationapp.domains.PenaltyStatus;
-import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
-import org.koulibrary.koulibraryreservationapp.domains.UserStatus;
+import org.koulibrary.koulibraryreservationapp.domains.*;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
@@ -208,6 +207,53 @@ public class ReservationService {
         }
 
         // Managed entity will automatically flush on commit. @Version handles optimistic locking.
+        return toMyResponse(reservation);
+    }
+
+
+    @Transactional
+    public MyReservationResponse checkIn(String keycloakSub, CheckInRequest req) {
+
+        // 1) Fetch user by Keycloak ID
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        // 2) Fetch desk by QR token from DTO request
+        Desk desk = deskRepository.findByQrCodeCode(req.getDeskQrToken())
+                .orElseThrow(() -> new InvalidQrCodeException("Invalid QR code"));
+
+        // 3) QR Code status verification (Prevents check-in using cancelled or renewed QR codes)
+        if (desk.getQrCode().getStatus() != QRCodeStatus.ACTIVE) {
+            throw new InvalidQrCodeException("This QR code is no longer active");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 4) Find the pending reservation for this user and specific desk
+        Reservation reservation = reservationRepository
+                .findPendingForCheckIn(user.getId(), desk.getId(), ReservationStatus.PENDING, now)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CheckInNotAvailableException(
+                        "You do not have a pending reservation available for check-in at this desk right now"));
+
+        // 5) Window verification: [startTime, startTime + checkInTimeoutMinutes]
+        Library library = reservation.getSlot().getSaloon().getLibrary();
+        LocalDateTime deadline = reservation.getStartTime().plusMinutes(library.getCheckInTimeoutMinutes());
+
+        if (now.isBefore(reservation.getStartTime())) {
+            throw new CheckInNotAvailableException("The reservation time window has not started yet");
+        }
+
+        if (now.isAfter(deadline)) {
+            throw new CheckInWindowExpiredException("Your check-in time frame has expired");
+        }
+
+        // 6) Activate reservation status and set check-in time
+        reservation.setStatus(ReservationStatus.ACTIVE);
+        reservation.setCheckInTime(now);
+
+        // Managed entity will automatically flush on transaction commit. @Version handles concurrency control.
         return toMyResponse(reservation);
     }
 
