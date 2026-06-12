@@ -507,34 +507,47 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(InvalidQrCodeException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDetail handleInvalidQrCodeException(InvalidQrCodeException ex, HttpServletRequest request) {
         return ErrorDetail.builder()
                 .error(ex.getMessage())
-                .status(HttpStatus.FORBIDDEN.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .build();
     }
 
     @ExceptionHandler(CheckInNotAvailableException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDetail handleCheckInNotAvailableException(CheckInNotAvailableException ex, HttpServletRequest request) {
         return ErrorDetail.builder()
                 .error(ex.getMessage())
-                .status(HttpStatus.FORBIDDEN.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .build();
     }
 
     @ExceptionHandler(CheckInWindowExpiredException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDetail handleCheckInWindowExpiredException(CheckInWindowExpiredException ex, HttpServletRequest request) {
         return ErrorDetail.builder()
                 .error(ex.getMessage())
-                .status(HttpStatus.FORBIDDEN.value())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+    @ExceptionHandler(ReservationNotCompletableException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorDetail handleReservationNotCompletableException(ReservationNotCompletableException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
                 .timestamp(LocalDateTime.now())
                 .build();
     }

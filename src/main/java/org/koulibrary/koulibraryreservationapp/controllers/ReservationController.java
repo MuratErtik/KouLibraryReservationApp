@@ -59,4 +59,11 @@ public class ReservationController {
 
         return ResponseEntity.ok(reservationService.checkIn(jwt.getSubject(), request));
     }
+
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<MyReservationResponse> complete(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(reservationService.complete(jwt.getSubject(), id));
+    }
 }

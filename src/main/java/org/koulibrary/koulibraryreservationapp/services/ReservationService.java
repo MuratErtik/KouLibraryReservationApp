@@ -1,8 +1,7 @@
 package org.koulibrary.koulibraryreservationapp.services;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
+import lombok.extern.slf4j.Slf4j;
 import org.koulibrary.koulibraryreservationapp.domains.*;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
@@ -23,6 +22,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.koulibrary.koulibraryreservationapp.configs.TimeConfig.APP_ZONE;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -37,6 +39,9 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
 
+        LocalDateTime now = LocalDateTime.now(APP_ZONE);
+        LocalDate today = now.toLocalDate();
+
         // 1) Fetch user WITH PESSIMISTIC LOCK (Maintains active reservation limit invariants)
         User user = userRepository.findByKeycloakIdForUpdate(keycloakSub)
                 .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
@@ -45,7 +50,7 @@ public class ReservationService {
             throw new UserBlockedException("Your account is blocked, you cannot create a reservation");
         }
 
-        if (penaltyRepository.existsActivePenalty(user.getId(), PenaltyStatus.ACTIVE, LocalDateTime.now())) {
+        if (penaltyRepository.existsActivePenalty(user.getId(), PenaltyStatus.ACTIVE, now)) {
             throw new UserBlockedException("You have an active penalty. You cannot reserve until your penalty period expires");
         }
 
@@ -61,12 +66,14 @@ public class ReservationService {
         Library library = slot.getSaloon().getLibrary();
         LocalDate slotDate = slot.getDate();
         LocalDateTime slotStart = LocalDateTime.of(slotDate, slot.getStartTime());
+        LocalDateTime slotEnd   = LocalDateTime.of(slotDate, slot.getEndTime());
 
-        if (slotStart.isBefore(LocalDateTime.now())) {
-            throw new ReservationWindowException("Cannot create a reservation for a past time slot");
+        // Slot bitmişse reddet (devam eden slot dahil rezerve edilebilir)
+        if (!slotEnd.isAfter(now)) {
+            throw new ReservationWindowException("This time slot has already ended");
         }
 
-        if (slotDate.isAfter(LocalDate.now().plusDays(library.getReservationWindowInDays()))) {
+        if (slotDate.isAfter(today.plusDays(library.getReservationWindowInDays()))) {
             throw new ReservationWindowException(
                     "You can only reserve for the next " + library.getReservationWindowInDays() + " days");
         }
@@ -78,7 +85,7 @@ public class ReservationService {
                     "You can have a maximum of " + library.getMaxActiveReservationsPerUser() + " active reservations");
         }
 
-        // one person only get one reservation per a slot
+        // one person only gets one reservation per slot
         if (reservationRepository.existsByUserIdAndSlotIdAndStatusIn(
                 user.getId(), slot.getId(), ReservationStatus.OCCUPYING)) {
             throw new AlreadyReservedInSlotException("Already Reserved In This slot before");
@@ -108,15 +115,14 @@ public class ReservationService {
                 .desk(desk)
                 .slot(slot)
                 .startTime(slotStart)
-                .endTime(LocalDateTime.of(slotDate, slot.getEndTime()))
-                .reservationTime(LocalDateTime.now())
+                .endTime(slotEnd)
+                .reservationTime(now)
                 .status(ReservationStatus.PENDING)
                 .build();
 
         try {
-            // flush is required here to force database constraint check before transaction commit phase
+            // flush is required to force the DB constraint check before the commit phase
             reservation = reservationRepository.saveAndFlush(reservation);
-
             logStatusChange(reservation, null, ReservationStatus.PENDING, user, null, "Reservation created");
         } catch (DataIntegrityViolationException e) {
             throw new DeskAlreadyReservedException("This desk was just reserved by another user");
@@ -141,7 +147,6 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public PageResponse<MyReservationResponse> getMyReservations(String keycloakSub, Pageable pageable) {
 
-        // Fetch user WITHOUT LOCK (Read-only operation)
         User user = userRepository.findByKeycloakId(keycloakSub)
                 .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
 
@@ -163,7 +168,6 @@ public class ReservationService {
 
     private MyReservationResponse toMyResponse(Reservation reservation) {
         Saloon saloon = reservation.getSlot().getSaloon();
-
         return MyReservationResponse.builder()
                 .id(reservation.getId())
                 .deskId(reservation.getDesk().getId())
@@ -178,64 +182,51 @@ public class ReservationService {
                 .build();
     }
 
-
     @Transactional
     public MyReservationResponse cancel(String keycloakSub, Long reservationId, CancelReservationRequest req) {
 
-        // 1) Fetch user by Keycloak ID
         User user = userRepository.findByKeycloakId(keycloakSub)
                 .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
 
-        // 2) Fetch reservation with details
         Reservation reservation = reservationRepository.findByIdWithDetails(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
 
-        // 3) Ownership check: A user can only cancel their own reservation
+        // Ownership: a user can only cancel their own reservation
         if (!reservation.getUser().getId().equals(user.getId())) {
             throw new ReservationDoesNotBelongToUserException("This reservation does not belong to you");
         }
 
-        // 4) State check: Only non-terminal (cancellable) statuses can be cancelled
-        // Note: Assumes PENDING or OCCUPYING are cancellable.
-        if (reservation.getStatus() == ReservationStatus.CANCELLED ||
-                reservation.getStatus() == ReservationStatus.COMPLETED) {
-            throw new ReservationNotCancellableException(
-                    "This reservation cannot be cancelled. Current status: " + reservation.getStatus());
-        }
-
+        // Only PENDING can be cancelled (ACTIVE ends via /complete)
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new ReservationNotCancellableException(
                     "Only pending reservations can be cancelled. Current status: " + reservation.getStatus());
         }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
-        if (req.getReason() != null && !req.getReason().isBlank()) reservation.setCancellationReason(req.getReason());
+        if (req.getReason() != null && !req.getReason().isBlank()) {
+            reservation.setCancellationReason(req.getReason());
+        }
         logStatusChange(reservation, ReservationStatus.PENDING, ReservationStatus.CANCELLED,
                 user, StatusChangeReason.USER_CANCELLED, req.getReason());
 
-        // Managed entity will automatically flush on commit. @Version handles optimistic locking.
         return toMyResponse(reservation);
     }
-
 
     @Transactional
     public MyReservationResponse checkIn(String keycloakSub, CheckInRequest req) {
 
-        // 1) Fetch user by Keycloak ID
         User user = userRepository.findByKeycloakId(keycloakSub)
                 .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
 
-        // 2) Fetch desk by QR token from DTO request
         Desk desk = deskRepository.findByQrCodeCode(req.getDeskQrToken())
                 .orElseThrow(() -> new InvalidQrCodeException("Invalid QR code"));
 
-        // 3) QR Code status verification (Prevents check-in using cancelled or renewed QR codes)
         if (desk.getQrCode().getStatus() != QRCodeStatus.ACTIVE) {
             throw new InvalidQrCodeException("This QR code is no longer active");
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(APP_ZONE);
 
-        // 4) Find the pending reservation for this user and specific desk
         Reservation reservation = reservationRepository
                 .findPendingForCheckIn(user.getId(), desk.getId(), ReservationStatus.PENDING, now)
                 .stream()
@@ -243,24 +234,50 @@ public class ReservationService {
                 .orElseThrow(() -> new CheckInNotAvailableException(
                         "You do not have a pending reservation available for check-in at this desk right now"));
 
-        // 5) Window verification: [startTime, startTime + checkInTimeoutMinutes]
         Library library = reservation.getSlot().getSaloon().getLibrary();
-        LocalDateTime deadline = reservation.getStartTime().plusMinutes(library.getCheckInTimeoutMinutes());
+
+        // Walk-in (slot başladıktan sonra rezerve eden) için check-in süresini
+        // rezerve ettiği andan başlat: deadline = max(startTime, reservationTime) + timeout
+        LocalDateTime windowBase = reservation.getReservationTime().isAfter(reservation.getStartTime())
+                ? reservation.getReservationTime()
+                : reservation.getStartTime();
+        LocalDateTime deadline = windowBase.plusMinutes(library.getCheckInTimeoutMinutes());
 
         if (now.isBefore(reservation.getStartTime())) {
             throw new CheckInNotAvailableException("The reservation time window has not started yet");
         }
-
         if (now.isAfter(deadline)) {
             throw new CheckInWindowExpiredException("Your check-in time frame has expired");
         }
 
-        // 6) Activate reservation status and set check-in time
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservation.setCheckInTime(now);
         logStatusChange(reservation, ReservationStatus.PENDING, ReservationStatus.ACTIVE, user, null, "checked in");
 
-        // Managed entity will automatically flush on transaction commit. @Version handles concurrency control.
+        return toMyResponse(reservation);
+    }
+
+    @Transactional
+    public MyReservationResponse complete(String keycloakSub, Long reservationId) {
+
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        Reservation reservation = reservationRepository.findByIdWithDetails(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+
+        if (!reservation.getUser().getId().equals(user.getId())) {
+            throw new ReservationDoesNotBelongToUserException("This reservation does not belong to you");
+        }
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new ReservationNotCompletableException(
+                    "Only active (checked-in) reservations can be completed. Current status: " + reservation.getStatus());
+        }
+
+        reservation.setStatus(ReservationStatus.COMPLETED);
+        logStatusChange(reservation, ReservationStatus.ACTIVE, ReservationStatus.COMPLETED, user, null, null);
+
         return toMyResponse(reservation);
     }
 
@@ -271,6 +288,4 @@ public class ReservationService {
                 .fromStatus(from).toStatus(to)
                 .reason(reason).note(note).build());
     }
-
-
 }
