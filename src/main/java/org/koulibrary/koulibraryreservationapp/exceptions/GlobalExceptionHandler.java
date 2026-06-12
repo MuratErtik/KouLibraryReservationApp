@@ -505,6 +505,44 @@ public class GlobalExceptionHandler {
 
 
 
+
+    @ExceptionHandler(InvalidQrCodeException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleInvalidQrCodeException(InvalidQrCodeException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(CheckInNotAvailableException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleCheckInNotAvailableException(CheckInNotAvailableException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(CheckInWindowExpiredException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public ErrorDetail handleCheckInWindowExpiredException(CheckInWindowExpiredException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
+
     @ExceptionHandler(DeskDoesNotBelongToSaloonException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
