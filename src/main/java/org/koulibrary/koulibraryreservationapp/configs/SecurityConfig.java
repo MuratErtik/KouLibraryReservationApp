@@ -57,6 +57,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER + "/*").hasRole("ADMIN")
                         .requestMatchers(RESERVATIONCONTROLLER + "/**").authenticated()
 
+                        .requestMatchers(HttpMethod.GET, PENALTYCONTROLLER + "/me").authenticated()
+                        .requestMatchers(PENALTYCONTROLLER + "/**").hasRole("ADMIN")
+
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
