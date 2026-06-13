@@ -110,4 +110,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
             "WHERE r.id = :id")
     Optional<Reservation> findByIdForAdmin(@Param("id") Long id);
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.user JOIN FETCH r.desk JOIN FETCH r.slot s JOIN FETCH s.saloon " +
+            "WHERE r.status = :status AND r.startTime BETWEEN :from AND :to")
+    List<Reservation> findUpcomingByStatus(@Param("status") ReservationStatus status,
+                                           @Param("from") LocalDateTime from,
+                                           @Param("to") LocalDateTime to);
 }
