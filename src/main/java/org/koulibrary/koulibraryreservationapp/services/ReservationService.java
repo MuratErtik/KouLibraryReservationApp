@@ -38,6 +38,7 @@ public class ReservationService {
     private final ReservationStatusLogRepository reservationStatusLogRepository;
     private final PenaltyService penaltyService;
     private final ApplicationEventPublisher eventPublisher;
+    private static final List<ReservationStatus> CLOSURE_CANCELLABLE = List.of(ReservationStatus.PENDING);
 
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
@@ -381,6 +382,29 @@ public class ReservationService {
                 reservation.getId(), null));
 
         return toAdminResponse(reservation);
+    }
+
+
+
+    @Transactional
+    public void cancelPendingReservationsForClosure(Long slotId) {
+        List<Reservation> affected = reservationRepository
+                .findBySlotIdAndStatusInWithDetails(slotId, CLOSURE_CANCELLABLE);
+
+        for (Reservation r : affected) {
+            ReservationStatus old = r.getStatus();
+            r.setStatus(ReservationStatus.CANCELLED);
+            r.setCancellationReason("Cancelled due to closure or working-hours change");
+
+            logStatusChange(r, old, ReservationStatus.CANCELLED, null,
+                    StatusChangeReason.SYSTEM_AUTO, "Slot became unavailable (closure/hours change)");
+
+            NotificationContent c = NotificationMessages.reservationClosed(
+                    r.getDesk().getDeskNumber(), r.getStartTime());
+            eventPublisher.publishEvent(new NotificationEvent(
+                    r.getUser().getId(), r.getUser().getEmail(), NotificationType.RESERVATION_CANCELLED,
+                    c.title(), c.body(), r.getId(), null));
+        }
     }
 
     private AdminReservationResponse toAdminResponse(Reservation r) {

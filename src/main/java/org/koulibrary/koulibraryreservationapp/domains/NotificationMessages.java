@@ -43,4 +43,11 @@ public final class NotificationMessages {
                         + startTime.format(DT) + " saatinde başlıyor.\n"
                         + "Masadaki QR kodu okutarak check-in yapmayı unutmayın.");
     }
+
+    public static NotificationContent reservationClosed(Integer deskNumber, LocalDateTime startTime) {
+        return new NotificationContent(
+                "Rezervasyonunuz iptal edildi",
+                deskNumber + " numaralı masa için " + startTime.format(DT)
+                        + " tarihli rezervasyonunuz, ilgili saatte kütüphane/salon kapalı olduğu için iptal edildi.");
+    }
 }

@@ -117,4 +117,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findUpcomingByStatus(@Param("status") ReservationStatus status,
                                            @Param("from") LocalDateTime from,
                                            @Param("to") LocalDateTime to);
+
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.user JOIN FETCH r.desk " +
+            "WHERE r.slot.id = :slotId AND r.status IN :statuses")
+    List<Reservation> findBySlotIdAndStatusInWithDetails(@Param("slotId") Long slotId,
+                                                         @Param("statuses") Collection<ReservationStatus> statuses);
 }
