@@ -288,4 +288,41 @@ public class ReservationService {
                 .fromStatus(from).toStatus(to)
                 .reason(reason).note(note).build());
     }
+
+    @Transactional
+    public int markNoShows() {
+        LocalDateTime now = LocalDateTime.now(APP_ZONE);
+        List<Reservation> candidates = reservationRepository.findStartedByStatus(ReservationStatus.PENDING, now);
+
+        int count = 0;
+        for (Reservation r : candidates) {
+            Integer timeout = r.getSlot().getSaloon().getLibrary().getCheckInTimeoutMinutes();
+
+            LocalDateTime base = r.getReservationTime().isAfter(r.getStartTime())
+                    ? r.getReservationTime() : r.getStartTime();
+            LocalDateTime deadline = base.plusMinutes(timeout);
+            LocalDateTime effective = deadline.isAfter(r.getEndTime()) ? r.getEndTime() : deadline;
+
+            if (now.isAfter(effective)) {
+                r.setStatus(ReservationStatus.NO_SHOW);
+                logStatusChange(r, ReservationStatus.PENDING, ReservationStatus.NO_SHOW,
+                        null, StatusChangeReason.NO_SHOW, "Missed check-in window");
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Transactional
+    public int autoCompleteEnded() {
+        LocalDateTime now = LocalDateTime.now(APP_ZONE);
+        List<Reservation> candidates = reservationRepository.findEndedByStatus(ReservationStatus.ACTIVE, now);
+
+        for (Reservation r : candidates) {
+            r.setStatus(ReservationStatus.COMPLETED);
+            logStatusChange(r, ReservationStatus.ACTIVE, ReservationStatus.COMPLETED,
+                    null, StatusChangeReason.SYSTEM_AUTO, "Auto-completed at slot end");
+        }
+        return candidates.size();
+    }
 }

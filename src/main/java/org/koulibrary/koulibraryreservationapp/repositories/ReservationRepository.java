@@ -73,4 +73,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                             @Param("deskId") Long deskId,
                                             @Param("status") ReservationStatus status,
                                             @Param("now") LocalDateTime now);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.status = :status AND r.startTime <= :now")
+    List<Reservation> findStartedByStatus(@Param("status") ReservationStatus status,
+                                          @Param("now") LocalDateTime now);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.endTime <= :now")
+    List<Reservation> findEndedByStatus(@Param("status") ReservationStatus status,
+                                        @Param("now") LocalDateTime now);
 }
