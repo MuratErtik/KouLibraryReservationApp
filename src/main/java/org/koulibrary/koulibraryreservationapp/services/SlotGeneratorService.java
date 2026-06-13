@@ -1,13 +1,11 @@
 package org.koulibrary.koulibraryreservationapp.services;
 
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
-import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.domains.SaloonStatus;
 import org.koulibrary.koulibraryreservationapp.entities.*;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
@@ -32,10 +30,9 @@ public class SlotGeneratorService {
     private final LibraryClosuresRepository libraryClosuresRepository;
     private final SaloonWorkingHoursRepository saloonWorkingHoursRepository;
     private final SaloonClosuresRepository saloonClosuresRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationService reservationService;   // CHANGED
 
     public static final int WINDOW_DAYS = 7;
-
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -49,7 +46,7 @@ public class SlotGeneratorService {
                 libraryWorkingHoursRepository.findByLibraryAndDayOfWeek(library, dayOfWeek);
         if (libraryWorkingHours.isEmpty()) {
             log.debug("{} is closed on {}, no slots generated", library.getName(), date);
-            return; // o gün hiç çalışmıyor -> slot olmamalı (closure değil)
+            return;
         }
 
         List<LibraryClosures> libraryClosures =
@@ -61,7 +58,7 @@ public class SlotGeneratorService {
         if (saloonWorkingHours.isPresent()) {
             if (saloonWorkingHours.get().getIsClosed()) {
                 log.debug("Saloon {} is closed on {}", saloon.getId(), dayOfWeek);
-                return; // saloon o gün hiç çalışmıyor
+                return;
             }
             opening = saloonWorkingHours.get().getOpeningTime();
             closing = saloonWorkingHours.get().getClosingTime();
@@ -124,9 +121,6 @@ public class SlotGeneratorService {
         if (!slotsToSave.isEmpty()) saloonTimeSlotRepository.saveAll(slotsToSave);
     }
 
-    private static final Set<ReservationStatus> LIVE_STATUSES =
-            EnumSet.of(ReservationStatus.PENDING, ReservationStatus.ACTIVE, ReservationStatus.SUSPENDED);
-
     @Transactional
     public void recomputeAvailability(Saloon saloon, Library library, LocalDate from, LocalDate to) {
 
@@ -152,9 +146,14 @@ public class SlotGeneratorService {
                                 isConflicting(date, slot.getStartTime(), slot.getEndTime(), salC,
                                         SaloonClosure::getStartDateTime, SaloonClosure::getEndDateTime);
 
+                boolean wasAvailable = Boolean.TRUE.equals(slot.getIsAvailable());
                 boolean available = operating && withinHours && !closed;
                 slot.setIsAvailable(available);
-                if (!available) cancelLiveReservations(slot);
+
+                // only on transition available -> unavailable, cancel PENDING reservations (+ notify)
+                if (wasAvailable && !available) {
+                    reservationService.cancelPendingReservationsForClosure(slot.getId());
+                }
             }
         }
     }
@@ -183,24 +182,6 @@ public class SlotGeneratorService {
         recomputeAvailability(saloon, library, today, today.plusDays(WINDOW_DAYS));
     }
 
-    private void cancelLiveReservations(SaloonTimeSlot slot) {
-        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
-        for (Reservation r : live) {
-            r.setStatus(ReservationStatus.CANCELLED);
-            r.setCancellationReason("Slot kapatildi");
-            // notification service
-        }
-    }
-
-//    private void cancelLiveReservations(SaloonTimeSlot slot, String reason) {
-//        List<Reservation> live = reservationRepository.findBySlotIdAndStatusIn(slot.getId(), LIVE_STATUSES);
-//        for (Reservation r : live) {
-//            r.setStatus(ReservationStatus.CANCELLED);
-//            r.setCancellationReason(reason);
-//            // notification service
-//        }
-//    }
-
     private <T> boolean isConflicting(LocalDate date, LocalTime slotStart, LocalTime slotEnd,
                                       List<T> closures,
                                       Function<T, LocalDateTime> getStart,
@@ -225,7 +206,7 @@ public class SlotGeneratorService {
     public void syncSaloon(Saloon saloon, Library library) {
         LocalDate from = LocalDate.now();
         LocalDate to   = from.plusDays(WINDOW_DAYS);
-        generateForSaloon(saloon, library, from, to);     //(idempotent)
-        recomputeAvailability(saloon, library, from, to);  // update just exist slots
+        generateForSaloon(saloon, library, from, to);
+        recomputeAvailability(saloon, library, from, to);
     }
 }
