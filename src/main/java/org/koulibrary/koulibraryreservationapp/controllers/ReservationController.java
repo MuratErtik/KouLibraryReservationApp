@@ -3,9 +3,11 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koulibrary.koulibraryreservationapp.configs.RestApisConf;
+import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.AdminReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.ReservationResponse;
@@ -13,11 +15,14 @@ import org.koulibrary.koulibraryreservationapp.services.ReservationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping(RestApisConf.RESERVATIONCONTROLLER)
@@ -65,5 +70,30 @@ public class ReservationController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long id) {
         return ResponseEntity.ok(reservationService.complete(jwt.getSubject(), id));
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<AdminReservationResponse>> getAllForAdmin(
+            @RequestParam(required = false) ReservationStatus status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long deskId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PageableDefault(size = 20, sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return ResponseEntity.ok(reservationService.getAllForAdmin(status, userId, deskId, date, pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AdminReservationResponse> getByIdForAdmin(@PathVariable Long id) {
+        return ResponseEntity.ok(reservationService.getByIdForAdmin(id));
+    }
+
+    @PatchMapping("/{id}/admin-cancel")
+    public ResponseEntity<AdminReservationResponse> adminCancel(
+            @PathVariable Long id,
+            @RequestBody(required = false) CancelReservationRequest request) {
+
+        String reason = request != null ? request.getReason() : null;
+        return ResponseEntity.ok(reservationService.adminCancel(id, reason));
     }
 }

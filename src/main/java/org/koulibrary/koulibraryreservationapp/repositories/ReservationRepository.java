@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -84,4 +85,29 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.endTime <= :now")
     List<Reservation> findEndedByStatus(@Param("status") ReservationStatus status,
                                         @Param("now") LocalDateTime now);
+
+    @Query(value = "SELECT r FROM Reservation r " +
+            "JOIN FETCH r.user u JOIN FETCH r.desk d " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE (:status IS NULL OR r.status = :status) " +
+            "AND (:userId IS NULL OR u.id = :userId) " +
+            "AND (:deskId IS NULL OR d.id = :deskId) " +
+            "AND (:date IS NULL OR s.date = :date)",
+            countQuery = "SELECT COUNT(r) FROM Reservation r " +
+                    "WHERE (:status IS NULL OR r.status = :status) " +
+                    "AND (:userId IS NULL OR r.user.id = :userId) " +
+                    "AND (:deskId IS NULL OR r.desk.id = :deskId) " +
+                    "AND (:date IS NULL OR r.slot.date = :date)")
+    Page<Reservation> findForAdmin(@Param("status") ReservationStatus status,
+                                   @Param("userId") Long userId,
+                                   @Param("deskId") Long deskId,
+                                   @Param("date") java.time.LocalDate date,
+                                   Pageable pageable);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.user JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.id = :id")
+    Optional<Reservation> findByIdForAdmin(@Param("id") Long id);
 }

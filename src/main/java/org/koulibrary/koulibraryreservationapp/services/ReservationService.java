@@ -2,10 +2,12 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.domains.*;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.AdminReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.ReservationResponse;
@@ -324,5 +326,67 @@ public class ReservationService {
                     null, StatusChangeReason.SYSTEM_AUTO, "Auto-completed at slot end");
         }
         return candidates.size();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminReservationResponse> getAllForAdmin(ReservationStatus status, Long userId,
+                                                                 Long deskId, LocalDate date, Pageable pageable) {
+        Page<Reservation> page = reservationRepository.findForAdmin(status, userId, deskId, date, pageable);
+        List<AdminReservationResponse> content = page.getContent().stream().map(this::toAdminResponse).toList();
+        return PageResponse.<AdminReservationResponse>builder()
+                .content(content)
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .isLast(page.isLast())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminReservationResponse getByIdForAdmin(Long id) {
+        Reservation r = reservationRepository.findByIdForAdmin(id)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + id));
+        return toAdminResponse(r);
+    }
+
+    @Transactional
+    public AdminReservationResponse adminCancel(Long reservationId, String reason) {
+        Reservation reservation = reservationRepository.findByIdForAdmin(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with ID: " + reservationId));
+
+        if (!ReservationStatus.OCCUPYING.contains(reservation.getStatus())) {
+            throw new ReservationNotCancellableException(
+                    "Cannot cancel a reservation in status: " + reservation.getStatus());
+        }
+
+        ReservationStatus old = reservation.getStatus();
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        if (reason != null && !reason.isBlank()) reservation.setCancellationReason(reason);
+
+        logStatusChange(reservation, old, ReservationStatus.CANCELLED, null, StatusChangeReason.ADMIN_CANCELLED, reason);
+
+        return toAdminResponse(reservation);
+    }
+
+    private AdminReservationResponse toAdminResponse(Reservation r) {
+        User u = r.getUser();
+        Saloon saloon = r.getSlot().getSaloon();
+        return AdminReservationResponse.builder()
+                .id(r.getId())
+                .userId(u.getId())
+                .studentIdNumber(u.getStudentIdNumber())
+                .userFullName(u.getFirstName() + " " + u.getLastName())
+                .deskId(r.getDesk().getId())
+                .deskNumber(r.getDesk().getDeskNumber())
+                .saloonName(saloon.getName())
+                .libraryName(saloon.getLibrary().getName())
+                .startTime(r.getStartTime())
+                .endTime(r.getEndTime())
+                .status(r.getStatus())
+                .reservationTime(r.getReservationTime())
+                .checkInTime(r.getCheckInTime())
+                .cancellationReason(r.getCancellationReason())
+                .build();
     }
 }

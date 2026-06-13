@@ -51,6 +51,12 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,    LIBRARYCONTROLLER + "/**").authenticated()
 
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER + "/me").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, RESERVATIONCONTROLLER + "/*/admin-cancel").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER + "/*").hasRole("ADMIN")
+                        .requestMatchers(RESERVATIONCONTROLLER + "/**").authenticated()
+
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
