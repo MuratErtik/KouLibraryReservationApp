@@ -11,6 +11,7 @@ import org.koulibrary.koulibraryreservationapp.services.LibraryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -109,6 +110,16 @@ public class DeskController {
         return ResponseEntity.noContent().build();
 
 
+    }
+
+    @PostMapping("/{id}/qr/regenerate")
+    public ResponseEntity<QrCodeResponse> regenerateQr(@PathVariable Long id) {
+        return ResponseEntity.ok(deskService.regenerateQr(id));
+    }
+
+    @GetMapping(value = "/{id}/qr-image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> qrImage(@PathVariable Long id) {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(deskService.generateQrImage(id));
     }
 
 

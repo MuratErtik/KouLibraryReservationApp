@@ -66,3 +66,7 @@ keycloak:
   realm: kou-library
   client-id: library-backend
   client-secret: ${KEYCLOAK_SECRET}
+
+app:
+  qr:
+    checkin-base-url: ${QR_CHECKIN_BASE_URL:http://localhost:5173/check-in}
