@@ -539,6 +539,31 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(PenaltyNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDetail handlePenaltyNotFoundException(PenaltyNotFoundException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(PenaltyOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDetail handlePenaltyOperationException(PenaltyOperationException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
 
 
     @ExceptionHandler(ReservationNotCompletableException.class)

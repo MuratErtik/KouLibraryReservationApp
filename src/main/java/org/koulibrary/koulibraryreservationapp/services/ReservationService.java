@@ -37,6 +37,7 @@ public class ReservationService {
     private final PenaltyRepository penaltyRepository;
     private final UserRepository userRepository;
     private final ReservationStatusLogRepository reservationStatusLogRepository;
+    private final PenaltyService penaltyService;
 
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
@@ -309,6 +310,11 @@ public class ReservationService {
                 r.setStatus(ReservationStatus.NO_SHOW);
                 logStatusChange(r, ReservationStatus.PENDING, ReservationStatus.NO_SHOW,
                         null, StatusChangeReason.NO_SHOW, "Missed check-in window");
+
+                int blockDays = r.getSlot().getSaloon().getLibrary().getPenaltyBlockDays();
+                penaltyService.createPenalty(r.getUser(), r, PenaltyReason.NO_SHOW, blockDays, "No-show penalty");
+
+
                 count++;
             }
         }
