@@ -51,6 +51,18 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,    LIBRARYCONTROLLER + "/**").authenticated()
 
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER + "/me").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, RESERVATIONCONTROLLER + "/*/admin-cancel").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, RESERVATIONCONTROLLER + "/*").hasRole("ADMIN")
+                        .requestMatchers(RESERVATIONCONTROLLER + "/**").authenticated()
+
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

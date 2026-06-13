@@ -16,7 +16,7 @@ public class TimeSlotScheduler {
 
 
     // it works every at 02.00AM
-    @Scheduled(cron = "0 54 22 * * *", zone = "Europe/Istanbul")
+    @Scheduled(cron = "0 03 19 * * *", zone = "Europe/Istanbul")
     public void generateUpcomingSlots() {
 
         log.info("TimeSlot generation started");

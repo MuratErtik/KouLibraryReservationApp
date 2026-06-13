@@ -28,6 +28,9 @@ public class RestApisConf {
 
     public static final String USERCONTROLLER = DEVELOPER+VERSIONS+"/users";
 
+    // RestApisConf
+    public static final String RESERVATIONCONTROLLER =  DEVELOPER+VERSIONS+"/reservations";
+
 
 
 

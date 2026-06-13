@@ -2,12 +2,17 @@ package org.koulibrary.koulibraryreservationapp.repositories;
 
 import org.koulibrary.koulibraryreservationapp.domains.ReservationStatus;
 import org.koulibrary.koulibraryreservationapp.entities.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -25,4 +30,84 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Set<Long> findReservedDeskIds(@Param("slotId") Long slotId,
                                   @Param("statuses") Collection<ReservationStatus> statuses);
 
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
+            "WHERE r.desk.id = :deskId AND r.slot.id = :slotId AND r.status IN :statuses")
+    Boolean existsByDeskIdAndSlotIdAndStatusIn(@Param("deskId") Long deskId,
+                                               @Param("slotId") Long slotId,
+                                               @Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId AND r.status IN :statuses")
+    Long countByUserIdAndStatusIn(@Param("userId") Long userId,
+                                  @Param("statuses") Collection<ReservationStatus> statuses);
+
+
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
+            "WHERE r.user.id = :userId AND r.slot.id = :slotId AND r.status IN :statuses")
+    Boolean existsByUserIdAndSlotIdAndStatusIn(@Param("userId") Long userId,
+                                               @Param("slotId") Long slotId,
+                                               @Param("statuses") Collection<ReservationStatus> statuses);
+
+
+    @Query(value = "SELECT r FROM Reservation r " +
+            "JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s " +
+            "JOIN FETCH s.saloon sa " +
+            "JOIN FETCH sa.library " +
+            "WHERE r.user.id = :userId",
+            countQuery = "SELECT COUNT(r) FROM Reservation r WHERE r.user.id = :userId")
+    Page<Reservation> findByUserIdWithDetails(@Param("userId") Long userId, Pageable pageable);
+
+    // ReservationRepository
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.id = :id")
+    Optional<Reservation> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "JOIN FETCH r.desk " +
+            "WHERE r.user.id = :userId AND r.desk.id = :deskId " +
+            "AND r.status = :status AND r.endTime >= :now " +
+            "ORDER BY r.startTime ASC")
+    List<Reservation> findPendingForCheckIn(@Param("userId") Long userId,
+                                            @Param("deskId") Long deskId,
+                                            @Param("status") ReservationStatus status,
+                                            @Param("now") LocalDateTime now);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.status = :status AND r.startTime <= :now")
+    List<Reservation> findStartedByStatus(@Param("status") ReservationStatus status,
+                                          @Param("now") LocalDateTime now);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.endTime <= :now")
+    List<Reservation> findEndedByStatus(@Param("status") ReservationStatus status,
+                                        @Param("now") LocalDateTime now);
+
+    @Query(value = "SELECT r FROM Reservation r " +
+            "JOIN FETCH r.user u JOIN FETCH r.desk d " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE (:status IS NULL OR r.status = :status) " +
+            "AND (:userId IS NULL OR u.id = :userId) " +
+            "AND (:deskId IS NULL OR d.id = :deskId) " +
+            "AND (:date IS NULL OR s.date = :date)",
+            countQuery = "SELECT COUNT(r) FROM Reservation r " +
+                    "WHERE (:status IS NULL OR r.status = :status) " +
+                    "AND (:userId IS NULL OR r.user.id = :userId) " +
+                    "AND (:deskId IS NULL OR r.desk.id = :deskId) " +
+                    "AND (:date IS NULL OR r.slot.date = :date)")
+    Page<Reservation> findForAdmin(@Param("status") ReservationStatus status,
+                                   @Param("userId") Long userId,
+                                   @Param("deskId") Long deskId,
+                                   @Param("date") java.time.LocalDate date,
+                                   Pageable pageable);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.user JOIN FETCH r.desk " +
+            "JOIN FETCH r.slot s JOIN FETCH s.saloon sa JOIN FETCH sa.library " +
+            "WHERE r.id = :id")
+    Optional<Reservation> findByIdForAdmin(@Param("id") Long id);
 }
