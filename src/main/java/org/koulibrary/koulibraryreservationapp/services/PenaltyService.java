@@ -3,17 +3,17 @@ package org.koulibrary.koulibraryreservationapp.services;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.koulibrary.koulibraryreservationapp.domains.LibraryStatus;
-import org.koulibrary.koulibraryreservationapp.domains.PenaltyReason;
-import org.koulibrary.koulibraryreservationapp.domains.PenaltyStatus;
+import org.koulibrary.koulibraryreservationapp.domains.*;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.*;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.*;
+import org.koulibrary.koulibraryreservationapp.events.NotificationEvent;
 import org.koulibrary.koulibraryreservationapp.exceptions.*;
 
 import org.koulibrary.koulibraryreservationapp.repositories.PenaltyRepository;
 
 import org.koulibrary.koulibraryreservationapp.repositories.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,6 +36,7 @@ public class PenaltyService {
 
     private final PenaltyRepository penaltyRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Penalty createPenalty(User user, Reservation reservation, PenaltyReason reason, int days, String description) {
@@ -49,7 +50,18 @@ public class PenaltyService {
                 .endTime(now.plusDays(days))
                 .description(description)
                 .build();
-        return penaltyRepository.save(penalty);
+        Penalty p = penaltyRepository.save(penalty);
+
+        NotificationContent c = (reason == PenaltyReason.NO_SHOW)
+                ? NotificationMessages.noShowPenalty(p.getEndTime())
+                : NotificationMessages.manualPenalty(p.getEndTime(), description);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                user.getId(), user.getEmail(), NotificationType.PENALTY_APPLIED,
+                c.title(), c.body(),
+                reservation != null ? reservation.getId() : null, p.getId()));
+
+        return p;
     }
 
     @Transactional
