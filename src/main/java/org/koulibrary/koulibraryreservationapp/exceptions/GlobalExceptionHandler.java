@@ -561,6 +561,30 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(QrGenerationException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ResponseBody
+    public ErrorDetail handleQrGenerationException(QrGenerationException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(QrCodeNotAvailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDetail handleQrCodeNotAvailableException(QrCodeNotAvailableException ex, HttpServletRequest request) {
+        return ErrorDetail.builder()
+                .error(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+
+
 
     @ExceptionHandler(NotificationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
