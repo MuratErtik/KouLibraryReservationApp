@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, PENALTYCONTROLLER + "/me").authenticated()
                         .requestMatchers(PENALTYCONTROLLER + "/**").hasRole("ADMIN")
 
+                        .requestMatchers(NOTIFICATIONCONTROLLER + "/**").authenticated()
+
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

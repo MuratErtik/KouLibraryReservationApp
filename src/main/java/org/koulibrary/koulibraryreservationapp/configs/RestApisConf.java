@@ -32,6 +32,8 @@ public class RestApisConf {
 
     public static final String PENALTYCONTROLLER = DEVELOPER + VERSIONS + "/penalties";
 
+    public static final String NOTIFICATIONCONTROLLER = DEVELOPER + VERSIONS + "/notifications";
+
 
 
 

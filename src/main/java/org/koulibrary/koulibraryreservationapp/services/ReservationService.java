@@ -7,13 +7,12 @@ import org.koulibrary.koulibraryreservationapp.domains.*;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CancelReservationRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CheckInRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateReservationRequest;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.AdminReservationResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.MyReservationResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
-import org.koulibrary.koulibraryreservationapp.dtos.responses.ReservationResponse;
+import org.koulibrary.koulibraryreservationapp.dtos.responses.*;
 import org.koulibrary.koulibraryreservationapp.entities.*;
+import org.koulibrary.koulibraryreservationapp.events.NotificationEvent;
 import org.koulibrary.koulibraryreservationapp.exceptions.*;
 import org.koulibrary.koulibraryreservationapp.repositories.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +37,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ReservationStatusLogRepository reservationStatusLogRepository;
     private final PenaltyService penaltyService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
@@ -371,6 +371,14 @@ public class ReservationService {
         if (reason != null && !reason.isBlank()) reservation.setCancellationReason(reason);
 
         logStatusChange(reservation, old, ReservationStatus.CANCELLED, null, StatusChangeReason.ADMIN_CANCELLED, reason);
+
+        NotificationContent c = NotificationMessages.adminCancelled(
+                reservation.getDesk().getDeskNumber(), reservation.getStartTime(), reason);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                reservation.getUser().getId(), reservation.getUser().getEmail(),
+                NotificationType.RESERVATION_CANCELLED, c.title(), c.body(),
+                reservation.getId(), null));
 
         return toAdminResponse(reservation);
     }
