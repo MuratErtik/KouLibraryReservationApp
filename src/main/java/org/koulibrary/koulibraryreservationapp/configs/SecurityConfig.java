@@ -40,7 +40,9 @@ public class SecurityConfig {
 
                         .requestMatchers(AUTHCONTROLLER + "/**").permitAll()
 
-                        .requestMatchers(USERCONTROLLER + "/me").authenticated()
+                        .requestMatchers(HttpMethod.GET,   USERCONTROLLER + "/me").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, USERCONTROLLER + "/me").authenticated()
+                        .requestMatchers(HttpMethod.POST,  USERCONTROLLER + "/me/password").authenticated()
                         .requestMatchers(USERCONTROLLER + "/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, DESKCONTROLLER + "/admin/**").hasRole("ADMIN")
