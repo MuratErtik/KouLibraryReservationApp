@@ -34,6 +34,8 @@ public class RestApisConf {
 
     public static final String NOTIFICATIONCONTROLLER = DEVELOPER + VERSIONS + "/notifications";
 
+    public static final String WAITLISTCONTROLLER = DEVELOPER + VERSIONS + "/waitlists";
+
 
 
 

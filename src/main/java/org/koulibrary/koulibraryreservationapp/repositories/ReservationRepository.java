@@ -122,4 +122,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.slot.id = :slotId AND r.status IN :statuses")
     List<Reservation> findBySlotIdAndStatusInWithDetails(@Param("slotId") Long slotId,
                                                          @Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.slot.id = :slotId AND r.status IN :statuses")
+    Long countOccupyingBySlotId(@Param("slotId") Long slotId, @Param("statuses") Collection<ReservationStatus> statuses);
 }

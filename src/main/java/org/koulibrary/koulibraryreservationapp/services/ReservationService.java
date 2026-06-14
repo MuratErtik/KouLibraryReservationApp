@@ -39,6 +39,7 @@ public class ReservationService {
     private final PenaltyService penaltyService;
     private final ApplicationEventPublisher eventPublisher;
     private static final List<ReservationStatus> CLOSURE_CANCELLABLE = List.of(ReservationStatus.PENDING);
+    private final WaitlistRepository waitlistRepository;
 
     @Transactional
     public ReservationResponse create(String keycloakSub, CreateReservationRequest req) {
@@ -132,6 +133,8 @@ public class ReservationService {
             // flush is required to force the DB constraint check before the commit phase
             reservation = reservationRepository.saveAndFlush(reservation);
             logStatusChange(reservation, null, ReservationStatus.PENDING, user, null, "Reservation created");
+            waitlistRepository.findByUserIdAndSlotIdAndStatusIn(user.getId(), reservation.getSlot().getId(), WaitlistService.ACTIVE)
+                    .ifPresent(w -> w.setStatus(WaitlistStatus.CONVERTED));
         } catch (DataIntegrityViolationException e) {
             throw new DeskAlreadyReservedException("This desk was just reserved by another user");
         }

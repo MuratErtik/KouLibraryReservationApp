@@ -2,7 +2,9 @@ package org.koulibrary.koulibraryreservationapp.domains;
 
 import org.koulibrary.koulibraryreservationapp.dtos.responses.NotificationContent;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public final class NotificationMessages {
@@ -10,6 +12,8 @@ public final class NotificationMessages {
     private NotificationMessages() {}
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+    private static final DateTimeFormatter D = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public static NotificationContent noShowPenalty(LocalDateTime penaltyEnd) {
         return new NotificationContent(
@@ -49,5 +53,14 @@ public final class NotificationMessages {
                 "Rezervasyonunuz iptal edildi",
                 deskNumber + " numaralı masa için " + startTime.format(DT)
                         + " tarihli rezervasyonunuz, ilgili saatte kütüphane/salon kapalı olduğu için iptal edildi.");
+    }
+
+
+
+    public static NotificationContent waitlistAvailable(String saloonName, LocalDate date, LocalTime start, LocalTime end) {
+        return new NotificationContent(
+                "Bekleme listenizde yer açıldı",
+                saloonName + " salonunda " + date.format(D) + " " + start + "–" + end + " için yer açıldı.\n"
+                        + "Önümüzdeki 15 dakika içinde rezervasyon yapabilirsiniz.");
     }
 }

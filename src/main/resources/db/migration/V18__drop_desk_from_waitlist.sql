@@ -1,0 +1,1 @@
+ALTER TABLE waitlist DROP COLUMN desk_id;

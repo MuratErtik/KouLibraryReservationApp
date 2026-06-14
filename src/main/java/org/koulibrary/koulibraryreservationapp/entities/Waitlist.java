@@ -27,10 +27,6 @@ public class Waitlist {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "desk_id", nullable = false)
-    private Desk desk;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", nullable = false)
     private SaloonTimeSlot slot;
 
