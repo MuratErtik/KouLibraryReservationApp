@@ -99,4 +99,22 @@ public class AuthService {
             throw new InvalidSchoolEmailException("Email prefix must match your student number");
         }
     }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email.trim().toLowerCase()).orElse(null);
+        if (user == null) return; // always succeed → no email enumeration
+        verificationService.issueAndSend(user, VerificationCodeType.PASSWORD_RESET);
+    }
+
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword) {
+        User user = userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new InvalidVerificationCodeException("Invalid or expired code"));
+
+        verificationService.consumeOrThrow(user, VerificationCodeType.PASSWORD_RESET, code);
+
+        keycloakAdminService.resetPassword(user.getKeycloakId(), newPassword);
+        keycloakAdminService.logoutAllSessions(user.getKeycloakId());
+    }
 }
