@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.koulibrary.koulibraryreservationapp.domains.UserStatus;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateAdminRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateMeRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.UserResponse;
 import org.koulibrary.koulibraryreservationapp.entities.User;
+import org.koulibrary.koulibraryreservationapp.exceptions.InvalidCredentialsException;
 import org.koulibrary.koulibraryreservationapp.exceptions.UserNotFoundException;
 import org.koulibrary.koulibraryreservationapp.repositories.UserRepository;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,9 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final KeycloakAdminService keycloakAdminService;
+
+    private final KeycloakAuthService keycloakAuthService;
+
 
     @Transactional(readOnly = true)
     public UserResponse getByKeycloakId(String keycloakId) {
@@ -92,5 +97,34 @@ public class UserService {
                 req.getLastName(), req.getPassword(), "ADMIN");
 
         return "Admin created successfully with email: " + req.getEmail();
+    }
+
+
+    @Transactional
+    public UserResponse updateMe(String keycloakSub, UpdateMeRequest req) {
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        if (req.firstName() != null) user.setFirstName(req.firstName());
+        if (req.lastName() != null)  user.setLastName(req.lastName());
+
+        keycloakAdminService.updateProfile(user.getKeycloakId(), user.getFirstName(), user.getLastName());
+        return toResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(String keycloakSub, String currentPassword, String newPassword) {
+        User user = userRepository.findByKeycloakId(keycloakSub)
+                .orElseThrow(() -> new UserNotFoundException("User not found for Keycloak ID: " + keycloakSub));
+
+        // verify current password by attempting a login (username = studentIdNumber)
+        try {
+            keycloakAuthService.login(user.getStudentIdNumber(), currentPassword);
+        } catch (InvalidCredentialsException ex) {
+            throw new InvalidCredentialsException("Current password is incorrect");
+        }
+
+        keycloakAdminService.resetPassword(user.getKeycloakId(), newPassword);
+        keycloakAdminService.logoutAllSessions(user.getKeycloakId()); // force re-login everywhere
     }
 }

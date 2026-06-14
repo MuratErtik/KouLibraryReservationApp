@@ -54,6 +54,10 @@ public class ReservationService {
             throw new UserBlockedException("Your account is blocked, you cannot create a reservation");
         }
 
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new AccountNotActiveException("Your account is not active. Please verify your email first");
+        }
+
         if (penaltyRepository.existsActivePenalty(user.getId(), PenaltyStatus.ACTIVE, now)) {
             throw new UserBlockedException("You have an active penalty. You cannot reserve until your penalty period expires");
         }

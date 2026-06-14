@@ -71,4 +71,25 @@ public class KeycloakAdminService {
         rep.setEnabled(enabled);
         userResource.update(rep);
     }
+
+    public void resetPassword(String keycloakId, String newPassword) {
+        CredentialRepresentation cred = new CredentialRepresentation();
+        cred.setType(CredentialRepresentation.PASSWORD);
+        cred.setValue(newPassword);
+        cred.setTemporary(false);
+        keycloak.realm(realm).users().get(keycloakId).resetPassword(cred);
+    }
+
+    public void updateProfile(String keycloakId, String firstName, String lastName) {
+        UserResource userResource = keycloak.realm(realm).users().get(keycloakId);
+        UserRepresentation rep = userResource.toRepresentation();
+        if (firstName != null) rep.setFirstName(firstName);
+        if (lastName != null)  rep.setLastName(lastName);
+        userResource.update(rep);
+    }
+
+    // invalidate all sessions after a password change/reset (security)
+    public void logoutAllSessions(String keycloakId) {
+        keycloak.realm(realm).users().get(keycloakId).logout();
+    }
 }

@@ -68,5 +68,7 @@ keycloak:
   client-secret: ${KEYCLOAK_SECRET}
 
 app:
+  allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:kocaeli.edu.tr}
+
   qr:
     checkin-base-url: ${QR_CHECKIN_BASE_URL:http://localhost:5173/check-in}
