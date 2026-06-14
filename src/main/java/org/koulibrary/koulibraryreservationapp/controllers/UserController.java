@@ -2,7 +2,9 @@ package org.koulibrary.koulibraryreservationapp.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.ChangePasswordRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.CreateAdminRequest;
+import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateMeRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.requests.UpdateUserStatusRequest;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.PageResponse;
 import org.koulibrary.koulibraryreservationapp.dtos.responses.UserResponse;
@@ -59,5 +61,18 @@ public class UserController {
     public ResponseEntity<String> createAdmin(@Valid @RequestBody CreateAdminRequest request) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createAdmin(request));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal Jwt jwt,
+                                                 @Valid @RequestBody UpdateMeRequest req) {
+        return ResponseEntity.ok(userService.updateMe(jwt.getSubject(), req));
+    }
+
+    @PostMapping("/me/password")
+    public ResponseEntity<Void> changePassword(@AuthenticationPrincipal Jwt jwt,
+                                               @Valid @RequestBody ChangePasswordRequest req) {
+        userService.changePassword(jwt.getSubject(), req.currentPassword(), req.newPassword());
+        return ResponseEntity.noContent().build();
     }
 }
